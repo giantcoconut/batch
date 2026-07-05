@@ -49,6 +49,27 @@ export function isValidOptionalHttpsUrl(value: string): boolean {
   }
 }
 
+export function isValidOptionalImageUrl(value: string): boolean {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return true;
+  }
+
+  if (
+    normalized.startsWith('https://') ||
+    normalized.startsWith('http://') ||
+    normalized.startsWith('ipfs://') ||
+    normalized.startsWith('/ipfs/') ||
+    normalized.startsWith('data:') ||
+    normalized.startsWith('blob:')
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 export function isValidAccountAddress(value: string): boolean {
   return isAddress(value.trim());
 }

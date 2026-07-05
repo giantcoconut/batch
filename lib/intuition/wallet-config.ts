@@ -14,7 +14,9 @@ import { INTUITION_CHAINS } from '@/lib/intuition/networks';
 const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID?.trim();
 
 if (!walletConnectProjectId) {
-  console.warn('[wallet-config] NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. WalletConnect will be unavailable.');
+  console.warn(
+    '[wallet-config] NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. Injected wallets remain available, but WalletConnect is disabled.',
+  );
 }
 
 const wallets: WalletList = [

@@ -73,9 +73,9 @@ test('buildListReviewRows marks existing and duplicate list entries', () => {
   ];
 
   const prepared: PreparedListEntry[] = [
-    { id: 'm1', listTermId: '0xaa', memberTermId: '0x11', tripleId: '0xff', alreadyExistsOnChain: false },
-    { id: 'm2', listTermId: '0xaa', memberTermId: '0x11', tripleId: '0xff', alreadyExistsOnChain: false },
-    { id: 'm3', listTermId: '0xaa', memberTermId: '0x12', tripleId: '0xee', alreadyExistsOnChain: true },
+    { id: 'm1', listTermId: '0xaa', memberTermId: '0x11', tripleId: '0xff', assetWei: 1n, alreadyExistsOnChain: false },
+    { id: 'm2', listTermId: '0xaa', memberTermId: '0x11', tripleId: '0xff', assetWei: 1n, alreadyExistsOnChain: false },
+    { id: 'm3', listTermId: '0xaa', memberTermId: '0x12', tripleId: '0xee', assetWei: 1n, alreadyExistsOnChain: true },
   ];
 
   const review = buildListReviewRows(rows, prepared);

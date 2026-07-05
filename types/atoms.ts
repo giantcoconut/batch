@@ -1,6 +1,7 @@
 import type { Hex } from 'viem';
 
 import type { IntuitionAtomSearchResult } from '@/types/api';
+import type { ReviewRow } from '@/types/review';
 
 export type AtomSchemaType = 'Thing' | 'Person' | 'Organization' | 'Account' | 'Raw';
 
@@ -24,6 +25,11 @@ export interface CsvAtomRow extends AtomDraft {
   sourceRecord: Record<string, string>;
 }
 
+export interface CsvAtomParseRow {
+  atom: CsvAtomRow;
+  errors: string[];
+}
+
 export interface PreparedAtomDraft {
   id: string;
   displayName: string;
@@ -40,3 +46,13 @@ export interface AtomDuplicateInspection {
   existingAtom: IntuitionAtomSearchResult | null;
   isDuplicateInBatch: boolean;
 }
+
+export interface AtomReviewPayload {
+  draft: AtomDraft;
+  prepared?: PreparedAtomDraft;
+  errors?: string[];
+}
+
+export type AtomReviewRow = ReviewRow<AtomReviewPayload>;
+export type ManualAtomReviewPayload = AtomReviewPayload;
+export type ManualAtomReviewRow = AtomReviewRow;

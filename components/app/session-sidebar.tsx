@@ -17,10 +17,10 @@ export function SessionSidebar() {
         <div className="space-y-2">
           <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Session</p>
           <p className="font-serif text-[1.55rem] leading-none tracking-[-0.045em] text-ink sm:text-[1.7rem]">
-            Intuition write foundation.
+            Review-first batch publishing.
           </p>
           <p className="text-sm leading-7 text-muted">
-            Wallet and network state are wired in now so the batch review flows can layer on cleanly.
+            Atom and list creation flows reuse the same wallet, review, and publish foundation.
           </p>
         </div>
         <div className="rounded-[1.05rem] border border-line/80 bg-paper/70 p-4">

@@ -1,7 +1,7 @@
 import { createEmptyAtomDraft, isRichAtomSchemaType, validateAtomDraft } from '@/lib/intuition/atom-prepare';
-import { findHeaderIndex, parseCsvRows, slugifyCsvHeader } from '@/lib/csv/parse-csv';
+import { findDuplicateHeaders, findHeaderIndex, parseCsvRows, slugifyCsvHeader } from '@/lib/csv/parse-csv';
 import { createLocalId } from '@/lib/utils/ids';
-import type { AtomSchemaType, CsvAtomRow } from '@/types/atoms';
+import type { AtomSchemaType, CsvAtomParseRow, CsvAtomRow } from '@/types/atoms';
 
 export const MAX_CSV_BATCH_SIZE = 50;
 
@@ -74,7 +74,7 @@ export function mapCsvRecordToAtom(
 export function parseCsvAtomText(
   text: string,
   defaultSchemaType: AtomSchemaType = 'Thing',
-): { atoms: CsvAtomRow[]; errors: string[] } {
+): { atoms: CsvAtomRow[]; rows: CsvAtomParseRow[]; errors: string[] } {
   const rows = parseCsvRows(text);
 
   if (rows.length === 0) {
@@ -87,6 +87,12 @@ export function parseCsvAtomText(
   }
 
   const headers = headerRow.map(slugifyCsvHeader);
+  const duplicateHeaders = findDuplicateHeaders(headers);
+
+  if (duplicateHeaders.length > 0) {
+    throw new Error(`CSV contains duplicate headers: ${duplicateHeaders.join(', ')}.`);
+  }
+
   if (
     findHeaderIndex(headers, ['name']) === -1 &&
     findHeaderIndex(headers, ['raw_data']) === -1 &&
@@ -96,6 +102,7 @@ export function parseCsvAtomText(
   }
 
   const atoms: CsvAtomRow[] = [];
+  const parsedRows: CsvAtomParseRow[] = [];
   const errors: string[] = [];
 
   rows.slice(1).forEach((cells, rowIndex) => {
@@ -110,14 +117,11 @@ export function parseCsvAtomText(
 
     const sourceLine = rowIndex + 2;
     const { atom, errors: rowErrors } = mapCsvRecordToAtom(values, sourceLine, defaultSchemaType);
+    const validationErrors = validateAtomDraft(atom);
     atoms.push(atom);
-
-    rowErrors.forEach((error) => {
-      errors.push(`Line ${sourceLine}: ${error}`);
-    });
-
-    validateAtomDraft(atom).forEach((error) => {
-      errors.push(`Line ${sourceLine}: ${error}`);
+    parsedRows.push({
+      atom,
+      errors: [...rowErrors, ...validationErrors],
     });
   });
 
@@ -126,8 +130,10 @@ export function parseCsvAtomText(
   }
 
   if (atoms.length > MAX_CSV_BATCH_SIZE) {
-    errors.push(`CSV import is limited to ${MAX_CSV_BATCH_SIZE} atoms per transaction.`);
+    parsedRows.slice(MAX_CSV_BATCH_SIZE).forEach((row) => {
+      row.errors.push(`CSV import is limited to ${MAX_CSV_BATCH_SIZE} atoms per transaction.`);
+    });
   }
 
-  return { atoms, errors };
+  return { atoms, rows: parsedRows, errors };
 }

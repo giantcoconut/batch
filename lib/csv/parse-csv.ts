@@ -64,3 +64,19 @@ export function slugifyCsvHeader(header: string): string {
 export function findHeaderIndex(headers: string[], candidates: string[]): number {
   return headers.findIndex((header) => candidates.includes(header));
 }
+
+export function findDuplicateHeaders(headers: string[]): string[] {
+  const counts = new Map<string, number>();
+
+  for (const header of headers) {
+    if (!header) {
+      continue;
+    }
+
+    counts.set(header, (counts.get(header) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([header]) => header);
+}

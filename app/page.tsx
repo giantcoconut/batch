@@ -2,6 +2,8 @@ import Link from 'next/link';
 
 import { AppShell } from '@/components/app/app-shell';
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   return (
     <AppShell>
@@ -12,8 +14,8 @@ export default function HomePage() {
             Review first. Publish Intuition batch operations with confidence.
           </h1>
           <p className="max-w-3xl text-base leading-8 text-muted sm:text-lg">
-            This standalone community app will support batch atom creation and batch list publishing with explicit
-            review states before any write is sent.
+            This standalone community app supports manual atoms, CSV atoms, manual lists, and CSV lists today, with
+            explicit review states before any write is sent.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -21,7 +23,7 @@ export default function HomePage() {
             href="/create"
             className="inline-flex rounded-full border border-ink bg-ink px-5 py-3 text-sm text-paper transition-colors duration-150 hover:bg-[#3a2a23]"
           >
-            Open foundation shell
+            Open batch workspace
           </Link>
         </div>
       </section>

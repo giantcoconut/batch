@@ -24,11 +24,11 @@ export function prepareCreateAtomsTransaction(atoms: PreparedAtomDraft[]): Prepa
   };
 }
 
-export function prepareCreateTriplesTransaction(entries: PreparedListEntry[], tripleCost: bigint): PreparedWriteTransaction {
+export function prepareCreateTriplesTransaction(entries: PreparedListEntry[]): PreparedWriteTransaction {
   const subjectIds = entries.map((entry) => entry.memberTermId);
   const predicateIds = entries.map(() => HAS_TAG_PREDICATE_TERM_ID);
   const objectIds = entries.map((entry) => entry.listTermId);
-  const assets = entries.map(() => tripleCost);
+  const assets = entries.map((entry) => entry.assetWei);
   const value = assets.reduce((total, asset) => total + asset, 0n);
 
   return {

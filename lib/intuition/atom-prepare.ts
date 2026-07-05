@@ -1,8 +1,15 @@
-import { getAddress, stringToHex, type Hex } from 'viem';
+import { getAddress, stringToHex, type Hex, type PublicClient } from 'viem';
 
 import { MULTIVAULT_ABI } from '@/lib/intuition/abi';
 import { getIntuitionNetwork } from '@/lib/intuition/networks';
-import { parseOptionalSupport, isValidAccountAddress, isValidOptionalEmail, isValidOptionalHttpsUrl, isValidPositiveIntegerString } from '@/lib/utils/validation';
+import {
+  parseOptionalSupport,
+  isValidAccountAddress,
+  isValidOptionalEmail,
+  isValidOptionalHttpsUrl,
+  isValidOptionalImageUrl,
+  isValidPositiveIntegerString,
+} from '@/lib/utils/validation';
 import type { IntuitionPinRequest, PublicIntuitionNetwork } from '@/types/api';
 import type { AtomDraft, AtomSchemaType, PreparedAtomDraft } from '@/types/atoms';
 
@@ -76,6 +83,10 @@ export function validateAtomDraft(draft: AtomDraft): string[] {
     errors.push('URL must be empty or a valid HTTPS URL.');
   }
 
+  if (!isValidOptionalImageUrl(draft.image)) {
+    errors.push('Image must be empty or a valid image URL or IPFS reference.');
+  }
+
   if (!isValidOptionalEmail(draft.email)) {
     errors.push('Email must be empty or valid.');
   }
@@ -104,14 +115,7 @@ export function validateAtomDraft(draft: AtomDraft): string[] {
 export async function prepareAtomDraft(
   draft: AtomDraft,
   network: PublicIntuitionNetwork,
-  publicClient: {
-    readContract: (args: {
-      address: Hex;
-      abi: typeof MULTIVAULT_ABI;
-      functionName: 'getAtomCost' | 'calculateAtomId' | 'isTermCreated';
-      args?: readonly unknown[];
-    }) => Promise<unknown>;
-  },
+  publicClient: PublicClient,
   pinRichMetadata?: (request: IntuitionPinRequest) => Promise<string>,
 ): Promise<PreparedAtomDraft> {
   let dataString = '';

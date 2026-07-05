@@ -1,12 +1,12 @@
-import { findHeaderIndex, parseCsvRows, slugifyCsvHeader } from '@/lib/csv/parse-csv';
+import { findDuplicateHeaders, findHeaderIndex, parseCsvRows, slugifyCsvHeader } from '@/lib/csv/parse-csv';
 import { createLocalId } from '@/lib/utils/ids';
-import type { ListMemberRow } from '@/types/lists';
+import type { CsvListParseRow, ListMemberRow } from '@/types/lists';
 
 export const MAX_LIST_BATCH_SIZE = 50;
 
 export function parseCsvListText(
   text: string,
-): { rows: ListMemberRow[]; errors: string[] } {
+): { rows: ListMemberRow[]; parsedRows: CsvListParseRow[]; errors: string[] } {
   const rows = parseCsvRows(text);
 
   if (rows.length === 0) {
@@ -19,14 +19,20 @@ export function parseCsvListText(
   }
 
   const headers = headerRow.map(slugifyCsvHeader);
+  const duplicateHeaders = findDuplicateHeaders(headers);
   const memberHeaderIndex = findHeaderIndex(headers, ['subject_name', 'subjectname', 'name', 'member', 'atom', 'label', 'subject']);
   const descriptionHeaderIndex = findHeaderIndex(headers, ['subject_description', 'subjectdescription', 'description', 'summary']);
+
+  if (duplicateHeaders.length > 0) {
+    throw new Error(`CSV contains duplicate headers: ${duplicateHeaders.join(', ')}.`);
+  }
 
   if (memberHeaderIndex === -1) {
     throw new Error('CSV must include a subject_name column. name, member, atom, label, and subject are also accepted.');
   }
 
   const parsedRows: ListMemberRow[] = [];
+  const rowResults: CsvListParseRow[] = [];
   const errors: string[] = [];
 
   rows.slice(1).forEach((cells, rowIndex) => {
@@ -34,17 +40,19 @@ export function parseCsvListText(
     const memberDescription = descriptionHeaderIndex === -1 ? '' : (cells[descriptionHeaderIndex] ?? '').trim();
     const sourceLine = rowIndex + 2;
 
-    if (!memberName) {
-      errors.push(`Line ${sourceLine}: Missing member name.`);
-    }
-
-    parsedRows.push({
+    const row: ListMemberRow = {
       id: createLocalId('list-member'),
       sourceLine,
       memberName,
       memberDescription,
       selectedAtom: null,
       candidates: [],
+    };
+
+    parsedRows.push(row);
+    rowResults.push({
+      row,
+      errors: memberName ? [] : ['Member name is required.'],
     });
   });
 
@@ -53,8 +61,10 @@ export function parseCsvListText(
   }
 
   if (parsedRows.length > MAX_LIST_BATCH_SIZE) {
-    errors.push(`CSV import is limited to ${MAX_LIST_BATCH_SIZE} list entries per transaction.`);
+    rowResults.slice(MAX_LIST_BATCH_SIZE).forEach((entry) => {
+      entry.errors.push(`CSV import is limited to ${MAX_LIST_BATCH_SIZE} list entries per transaction.`);
+    });
   }
 
-  return { rows: parsedRows, errors };
+  return { rows: parsedRows, parsedRows: rowResults, errors };
 }
