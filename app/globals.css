@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  background:
+    radial-gradient(circle at top, rgba(241, 229, 208, 0.95), rgba(248, 244, 236, 1) 42%),
+    linear-gradient(180deg, #f7f3ea 0%, #f4efe4 100%);
+}
+
+body {
+  @apply min-h-screen bg-transparent text-ink antialiased;
+}
+
+a {
+  @apply text-inherit;
+}
