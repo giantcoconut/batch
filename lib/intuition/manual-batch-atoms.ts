@@ -24,6 +24,14 @@ interface PublishManualBatchAtomsOptions {
   walletAddress: Hex;
 }
 
+interface CreateSingleAtomOptions {
+  draft: AtomDraft;
+  network: PublicIntuitionNetwork;
+  publicClient: PublicClient;
+  walletClient: WalletClient;
+  walletAddress: Hex;
+}
+
 function buildInvalidRow(draft: AtomDraft, errors: string[]): AtomReviewRow {
   return {
     id: draft.id,
@@ -126,5 +134,48 @@ export async function publishManualBatchAtoms({
     txHash,
     createdIds: atoms.map((atom) => atom.atomId),
     skippedIds: [],
+  };
+}
+
+export async function createSingleAtom({
+  draft,
+  network,
+  publicClient,
+  walletClient,
+  walletAddress,
+}: CreateSingleAtomOptions): Promise<{
+  prepared: PreparedAtomDraft;
+  writeResult: WriteResult;
+}> {
+  const errors = validateAtomDraft(draft);
+
+  if (errors.length > 0) {
+    throw new Error(errors.join(' '));
+  }
+
+  const prepared = await prepareAtomDraft(draft, network, publicClient, pinRichMetadata);
+
+  if (prepared.existsOnChain) {
+    return {
+      prepared,
+      writeResult: {
+        kind: 'skipped',
+        createdIds: [],
+        skippedIds: [prepared.atomId],
+      },
+    };
+  }
+
+  const writeResult = await publishManualBatchAtoms({
+    atoms: [prepared],
+    network,
+    publicClient,
+    walletClient,
+    walletAddress,
+  });
+
+  return {
+    prepared,
+    writeResult,
   };
 }

@@ -20,12 +20,18 @@ export function AtomDraftRowEditor({
   draft,
   index,
   disabled,
+  title,
+  helperText,
+  hideRemoveButton,
   onPatch,
   onRemove,
 }: {
   draft: AtomDraft;
   index: number;
   disabled?: boolean;
+  title?: string;
+  helperText?: string;
+  hideRemoveButton?: boolean;
   onPatch: (patch: Partial<AtomDraft>) => void;
   onRemove: () => void;
 }) {
@@ -151,7 +157,10 @@ export function AtomDraftRowEditor({
   return (
     <div className="rounded-[1.15rem] border border-line/80 bg-paper/60 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Atom {index + 1}</p>
+        <div className="space-y-1">
+          <p className="text-[0.72rem] uppercase tracking-terminal text-muted">{title ?? `Atom ${index + 1}`}</p>
+          {helperText ? <p className="text-sm leading-7 text-muted">{helperText}</p> : null}
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={draft.schemaType}
@@ -165,14 +174,16 @@ export function AtomDraftRowEditor({
               </option>
             ))}
           </select>
-          <button
-            type="button"
-            onClick={onRemove}
-            disabled={disabled}
-            className="inline-flex rounded-full border border-line bg-white/75 px-3 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Remove
-          </button>
+          {hideRemoveButton ? null : (
+            <button
+              type="button"
+              onClick={onRemove}
+              disabled={disabled}
+              className="inline-flex rounded-full border border-line bg-white/75 px-3 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Remove
+            </button>
+          )}
         </div>
       </div>
 
