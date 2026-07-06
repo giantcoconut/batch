@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getAddress, type Hex } from 'viem';
 import { useAccount, useChainId, useWalletClient } from 'wagmi';
 
+import { useSelectedNetwork } from '@/components/app/network-provider';
 import { AtomSearchSelect } from '@/components/lists/atom-search-select';
 import { CsvListPreviewTable } from '@/components/lists/csv-list-preview-table';
 import { ListReviewTable } from '@/components/lists/list-review-table';
@@ -13,10 +14,10 @@ import {
   getCreatablePreparedListEntries,
   publishManualBatchLists,
 } from '@/lib/intuition/manual-batch-lists';
-import { getIntuitionNetwork, getIntuitionNetworkByChainId, INTUITION_NETWORKS } from '@/lib/intuition/networks';
+import { getIntuitionNetwork, getIntuitionNetworkByChainId } from '@/lib/intuition/networks';
 import { createIntuitionPublicClient } from '@/lib/intuition/public-client';
 import { getPublishDisabledReason } from '@/lib/utils/publish-state';
-import type { IntuitionAtomSearchResult, PublicIntuitionNetwork } from '@/types/api';
+import type { IntuitionAtomSearchResult } from '@/types/api';
 import type { CsvListParseRow, ManualListReviewRow } from '@/types/lists';
 import type { WriteResult } from '@/types/writes';
 
@@ -26,8 +27,8 @@ export function CsvBatchListsFlow() {
   const { address, status: accountStatus } = useAccount();
   const chainId = useChainId();
   const { data: walletClient } = useWalletClient();
+  const { network } = useSelectedNetwork();
 
-  const [network, setNetwork] = useState<PublicIntuitionNetwork>('testnet');
   const [listQuery, setListQuery] = useState('');
   const [listAtom, setListAtom] = useState<IntuitionAtomSearchResult | null>(null);
   const [csvText, setCsvText] = useState(DEFAULT_CSV_TEXT);
@@ -47,12 +48,6 @@ export function CsvBatchListsFlow() {
   const walletReady = accountStatus === 'connected' && !!address;
   const canWrite = walletReady && walletNetworkConfig?.key === network;
   const hasNetworkMismatch = walletReady && walletNetworkConfig !== null && walletNetworkConfig?.key !== network;
-
-  useEffect(() => {
-    if (walletNetworkConfig && walletNetworkConfig.key !== network) {
-      setNetwork(walletNetworkConfig.key);
-    }
-  }, [walletNetworkConfig, network]);
 
   const creatableEntries = useMemo(
     () => (reviewRows ? getCreatablePreparedListEntries(reviewRows) : []),
@@ -229,23 +224,6 @@ export function CsvBatchListsFlow() {
               </p>
             </div>
 
-            <div className="space-y-3 rounded-[1.05rem] border border-line/80 bg-paper/60 p-4">
-              <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Target network</p>
-              <div className="inline-flex rounded-full border border-line bg-white/80 p-1">
-                {(Object.keys(INTUITION_NETWORKS) as PublicIntuitionNetwork[]).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setNetwork(option)}
-                    className={`rounded-full px-4 py-2 text-sm transition-colors duration-150 ${
-                      network === option ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    {getIntuitionNetwork(option).name}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           <AtomSearchSelect

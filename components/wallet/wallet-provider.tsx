@@ -8,6 +8,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { WagmiProvider } from 'wagmi';
 
+import { SelectedNetworkProvider } from '@/components/app/network-provider';
 import { walletConfig } from '@/lib/intuition/wallet-config';
 
 const rainbowTheme = lightTheme({
@@ -51,7 +52,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     <WagmiProvider config={walletConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={rainbowTheme} modalSize="compact" avatar={WalletAvatar}>
-          {children}
+          <SelectedNetworkProvider>{children}</SelectedNetworkProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

@@ -1,19 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getAddress, type Hex } from 'viem';
 import { useAccount, useChainId, useWalletClient } from 'wagmi';
 
+import { useSelectedNetwork } from '@/components/app/network-provider';
 import { AtomDraftRowEditor } from '@/components/atoms/atom-draft-row-editor';
 import { AtomReviewTable } from '@/components/atoms/atom-review-table';
 import { createIntuitionPublicClient } from '@/lib/intuition/public-client';
 import { createEmptyAtomDraft } from '@/lib/intuition/atom-prepare';
 import { getCreatablePreparedAtoms, publishManualBatchAtoms, reviewManualBatchAtoms } from '@/lib/intuition/manual-batch-atoms';
-import { getIntuitionNetwork, getIntuitionNetworkByChainId, INTUITION_NETWORKS } from '@/lib/intuition/networks';
+import { getIntuitionNetwork, getIntuitionNetworkByChainId } from '@/lib/intuition/networks';
 import { createLocalId } from '@/lib/utils/ids';
 import { getPublishDisabledReason } from '@/lib/utils/publish-state';
 import type { AtomDraft, ManualAtomReviewRow } from '@/types/atoms';
-import type { PublicIntuitionNetwork } from '@/types/api';
 import type { WriteResult } from '@/types/writes';
 
 function createDraft(seed = ''): AtomDraft {
@@ -27,9 +27,9 @@ export function ManualBatchAtomsFlow() {
   const { address, status: accountStatus } = useAccount();
   const chainId = useChainId();
   const { data: walletClient } = useWalletClient();
+  const { network } = useSelectedNetwork();
 
-  const [network, setNetwork] = useState<PublicIntuitionNetwork>('testnet');
-  const [drafts, setDrafts] = useState<AtomDraft[]>([createDraft(), createDraft()]);
+  const [drafts, setDrafts] = useState<AtomDraft[]>([createDraft()]);
   const [reviewRows, setReviewRows] = useState<ManualAtomReviewRow[] | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,13 +44,9 @@ export function ManualBatchAtomsFlow() {
   const canWrite = walletReady && walletNetworkConfig?.key === network;
   const hasNetworkMismatch = walletReady && walletNetworkConfig !== null && walletNetworkConfig?.key !== network;
 
-  useEffect(() => {
-    if (walletNetworkConfig && walletNetworkConfig.key !== network) {
-      setNetwork(walletNetworkConfig.key);
-    }
-  }, [walletNetworkConfig, network]);
-
   const creatableAtoms = useMemo(() => (reviewRows ? getCreatablePreparedAtoms(reviewRows) : []), [reviewRows]);
+  const isSingleDraftMode = drafts.length === 1;
+  const hasSingleEligibleAtom = creatableAtoms.length === 1;
   const publishDisabledReason = getPublishDisabledReason({
     hasReview: !!reviewRows,
     eligibleCount: creatableAtoms.length,
@@ -150,33 +146,16 @@ export function ManualBatchAtomsFlow() {
         <div className="space-y-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-3">
-              <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Manual batch atoms</p>
+              <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Manual atoms</p>
               <h1 className="font-serif text-[2.6rem] leading-none tracking-[-0.05em] sm:text-[3.3rem]">
-                Create multiple atoms in one reviewed batch.
+                Create one atom fast, or build a reviewed batch when you need it.
               </h1>
               <p className="max-w-3xl text-sm leading-7 text-muted">
-                Add several atom drafts, review duplicate and existing status, then publish only the eligible rows in one
-                `createAtoms` transaction.
+                Start with a single atom draft for the common case, then add more rows whenever you want batch review,
+                duplicate detection, and one `createAtoms` transaction for every eligible atom.
               </p>
             </div>
 
-            <div className="space-y-3 rounded-[1.05rem] border border-line/80 bg-paper/60 p-4">
-              <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Target network</p>
-              <div className="inline-flex rounded-full border border-line bg-white/80 p-1">
-                {(Object.keys(INTUITION_NETWORKS) as PublicIntuitionNetwork[]).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setNetwork(option)}
-                    className={`rounded-full px-4 py-2 text-sm transition-colors duration-150 ${
-                      network === option ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    {getIntuitionNetwork(option).name}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="space-y-4">
@@ -209,7 +188,7 @@ export function ManualBatchAtomsFlow() {
               disabled={isReviewing || isPublishing}
               className="inline-flex rounded-full border border-line bg-paper/70 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isReviewing ? 'Reviewing batch...' : 'Review batch'}
+              {isReviewing ? `Reviewing ${isSingleDraftMode ? 'atom' : 'batch'}...` : `Review ${isSingleDraftMode ? 'atom' : 'batch'}`}
             </button>
           </div>
 
@@ -223,7 +202,8 @@ export function ManualBatchAtomsFlow() {
                   Only rows marked `ready_to_create` are included in the transaction.
                 </p>
                 <p className="text-sm leading-7 text-muted">
-                  Eligible rows: <span className="text-ink">{creatableAtoms.length}</span> / {reviewRows?.length ?? 0}
+                  Eligible {isSingleDraftMode ? 'atoms' : 'rows'}: <span className="text-ink">{creatableAtoms.length}</span> /{' '}
+                  {reviewRows?.length ?? 0}
                 </p>
               </div>
 
@@ -235,7 +215,11 @@ export function ManualBatchAtomsFlow() {
                 disabled={!reviewRows || creatableAtoms.length === 0 || !canWrite || isPublishing || isReviewing}
                 className="inline-flex rounded-full border border-ink px-5 py-3 text-sm text-ink transition-colors duration-150 hover:bg-ink hover:text-paper disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isPublishing ? 'Publishing batch...' : hasNetworkMismatch ? 'Wrong network' : 'Publish eligible atoms'}
+                {isPublishing
+                  ? `Publishing ${hasSingleEligibleAtom ? 'atom' : 'batch'}...`
+                  : hasNetworkMismatch
+                    ? 'Wrong network'
+                    : `Publish eligible ${hasSingleEligibleAtom ? 'atom' : 'atoms'}`}
               </button>
             </div>
 

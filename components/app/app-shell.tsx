@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { NetworkToggle } from '@/components/app/network-toggle';
 import { WalletButton } from '@/components/wallet/wallet-button';
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -15,7 +16,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
           <p className="text-sm leading-6 text-muted">Community batch operations for Intuition protocol writes.</p>
         </div>
-        <WalletButton />
+        <div className="flex flex-wrap items-start justify-end gap-3">
+          <NetworkToggle />
+          <WalletButton />
+        </div>
       </header>
       {children}
     </div>

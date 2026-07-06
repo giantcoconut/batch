@@ -17,7 +17,7 @@ export function AtomCreationWorkspace() {
       <div className="rounded-[1.15rem] border border-line/80 bg-paper/70 p-3">
         <div className="flex flex-wrap gap-2 rounded-[1.1rem] border border-line bg-white/80 p-2">
           {([
-            ['manual_atoms', 'Batch atoms'],
+            ['manual_atoms', 'Atoms'],
             ['csv_atoms', 'CSV atoms'],
             ['manual_lists', 'Batch lists'],
             ['csv_lists', 'CSV lists'],

@@ -2,13 +2,15 @@
 
 import { useAccount, useChainId } from 'wagmi';
 
+import { useSelectedNetwork } from '@/components/app/network-provider';
 import { NetworkBadge } from '@/components/app/network-badge';
-import { getIntuitionNetworkByChainId } from '@/lib/intuition/networks';
+import { getIntuitionNetwork, getIntuitionNetworkByChainId } from '@/lib/intuition/networks';
 import { formatAddress } from '@/lib/utils/format';
 
 export function SessionSidebar() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
+  const { network: selectedNetwork } = useSelectedNetwork();
   const network = getIntuitionNetworkByChainId(chainId ?? null);
 
   return (
@@ -28,11 +30,16 @@ export function SessionSidebar() {
           <p className="mt-2 text-sm leading-6 text-ink">{isConnected ? formatAddress(address ?? null) : 'Not connected'}</p>
         </div>
         <div className="rounded-[1.05rem] border border-line/80 bg-paper/70 p-4">
-          <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Network</p>
+          <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Wallet network</p>
           <div className="mt-2">
             <NetworkBadge chainId={chainId ?? null} />
           </div>
           {network ? <p className="mt-3 text-sm leading-6 text-muted">Configured for {network.nativeSymbol} writes.</p> : null}
+        </div>
+        <div className="rounded-[1.05rem] border border-line/80 bg-paper/70 p-4">
+          <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Target network</p>
+          <p className="mt-2 text-sm leading-6 text-ink">{getIntuitionNetwork(selectedNetwork).name}</p>
+          <p className="mt-3 text-sm leading-6 text-muted">All batch flows use this shared publish target.</p>
         </div>
       </div>
     </aside>

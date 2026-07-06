@@ -1,18 +1,18 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getAddress, type Hex } from 'viem';
 import { useAccount, useChainId, useWalletClient } from 'wagmi';
 
+import { useSelectedNetwork } from '@/components/app/network-provider';
 import { AtomReviewTable } from '@/components/atoms/atom-review-table';
 import { CsvAtomPreviewTable } from '@/components/atoms/csv-atom-preview-table';
 import { parseCsvAtomText } from '@/lib/csv/atom-csv';
 import { createIntuitionPublicClient } from '@/lib/intuition/public-client';
 import { getCreatablePreparedAtoms, publishManualBatchAtoms, reviewAtomDraftBatch } from '@/lib/intuition/manual-batch-atoms';
-import { getIntuitionNetwork, getIntuitionNetworkByChainId, INTUITION_NETWORKS } from '@/lib/intuition/networks';
+import { getIntuitionNetwork, getIntuitionNetworkByChainId } from '@/lib/intuition/networks';
 import { getPublishDisabledReason } from '@/lib/utils/publish-state';
 import type { AtomReviewRow, AtomSchemaType, CsvAtomParseRow } from '@/types/atoms';
-import type { PublicIntuitionNetwork } from '@/types/api';
 import type { WriteResult } from '@/types/writes';
 
 const DEFAULT_CSV_TEXT = ['name,description,image_url', 'Acme Protocol,Collective knowledge graph builder,https://picsum.photos/120'].join('\n');
@@ -21,8 +21,8 @@ export function CsvBatchAtomsFlow() {
   const { address, status: accountStatus } = useAccount();
   const chainId = useChainId();
   const { data: walletClient } = useWalletClient();
+  const { network } = useSelectedNetwork();
 
-  const [network, setNetwork] = useState<PublicIntuitionNetwork>('testnet');
   const [defaultSchemaType, setDefaultSchemaType] = useState<AtomSchemaType>('Thing');
   const [csvText, setCsvText] = useState(DEFAULT_CSV_TEXT);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -41,12 +41,6 @@ export function CsvBatchAtomsFlow() {
   const walletReady = accountStatus === 'connected' && !!address;
   const canWrite = walletReady && walletNetworkConfig?.key === network;
   const hasNetworkMismatch = walletReady && walletNetworkConfig !== null && walletNetworkConfig?.key !== network;
-
-  useEffect(() => {
-    if (walletNetworkConfig && walletNetworkConfig.key !== network) {
-      setNetwork(walletNetworkConfig.key);
-    }
-  }, [walletNetworkConfig, network]);
 
   const creatableAtoms = useMemo(() => (reviewRows ? getCreatablePreparedAtoms(reviewRows) : []), [reviewRows]);
   const invalidPreviewRows = useMemo(() => parsedRows?.filter((row) => row.errors.length > 0).length ?? 0, [parsedRows]);
@@ -194,23 +188,6 @@ export function CsvBatchAtomsFlow() {
               </p>
             </div>
 
-            <div className="space-y-3 rounded-[1.05rem] border border-line/80 bg-paper/60 p-4">
-              <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Target network</p>
-              <div className="inline-flex rounded-full border border-line bg-white/80 p-1">
-                {(Object.keys(INTUITION_NETWORKS) as PublicIntuitionNetwork[]).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setNetwork(option)}
-                    className={`rounded-full px-4 py-2 text-sm transition-colors duration-150 ${
-                      network === option ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    {getIntuitionNetwork(option).name}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)]">
