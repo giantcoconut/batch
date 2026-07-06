@@ -49,6 +49,7 @@ export interface IntuitionImageUploadInput {
 export interface IntuitionUploadedImage {
   url: string;
   safe?: boolean;
+  originalUrl?: string;
 }
 
 export interface ReviewSummaryCounts {

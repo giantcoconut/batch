@@ -80,6 +80,52 @@ export function validateAtomImageFile(file: File): string | null {
   return null;
 }
 
+export function readImageFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        reject(new Error('Upload failed.'));
+        return;
+      }
+
+      const [, data = ''] = reader.result.split(',', 2);
+
+      if (!data) {
+        reject(new Error('Upload failed.'));
+        return;
+      }
+
+      resolve(data);
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Upload failed.'));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+export function normalizeImageUploadError(caughtError: unknown): string {
+  if (caughtError instanceof DOMException && caughtError.name === 'AbortError') {
+    return 'Upload failed.';
+  }
+
+  if (caughtError instanceof Error && caughtError.message.trim()) {
+    const message = caughtError.message.trim();
+
+    if (message.toLowerCase().includes('webhook')) {
+      return 'Intuition image upload failed upstream. Try again, or paste a public image URL and import it instead.';
+    }
+
+    return message;
+  }
+
+  return 'Upload failed. You can still paste an image URL manually.';
+}
+
 export async function uploadIntuitionImage(
   network: PublicIntuitionNetwork,
   image: IntuitionImageUploadInput,
@@ -110,4 +156,40 @@ export async function uploadIntuitionImage(
   }
 
   return payload.safe === undefined ? { url: payload.url } : { url: payload.url, safe: payload.safe };
+}
+
+export async function uploadIntuitionImageFromUrl(
+  network: PublicIntuitionNetwork,
+  imageUrl: string,
+  signal?: AbortSignal,
+): Promise<IntuitionUploadedImage> {
+  const requestInit: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ network, imageUrl }),
+    cache: 'no-store',
+  };
+
+  if (signal) {
+    requestInit.signal = signal;
+  }
+
+  const response = await fetch('/api/intuition/upload-image', requestInit);
+  const payload = (await response.json()) as IntuitionUploadedImage & { error?: string };
+
+  if (!response.ok) {
+    throw new Error(payload.error ?? `Image import failed with HTTP ${response.status}.`);
+  }
+
+  if (!payload.url || (!payload.url.startsWith('https://') && !payload.url.startsWith('ipfs://'))) {
+    throw new Error('Image import failed.');
+  }
+
+  return {
+    url: payload.url,
+    ...(payload.safe === undefined ? {} : { safe: payload.safe }),
+    ...(payload.originalUrl ? { originalUrl: payload.originalUrl } : {}),
+  };
 }

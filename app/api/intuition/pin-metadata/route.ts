@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { requestIntuitionPinGraph } from '@/lib/intuition/pinning';
+import { requestIntuitionPinGraph, requestIntuitionPinThing } from '@/lib/intuition/pinning';
 import type { IntuitionPinRequest } from '@/types/api';
-
-const PIN_THING_MUTATION = `
-  mutation PinThing($name: String!, $description: String!, $image: String!, $url: String!) {
-    pinThing(thing: { name: $name, description: $description, image: $image, url: $url }) {
-      uri
-    }
-  }
-`;
 
 const PIN_PERSON_MUTATION = `
   mutation PinPerson($name: String!, $description: String!, $image: String!, $url: String!, $email: String!, $identifier: String!) {
@@ -94,40 +86,45 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Email must be empty or valid.' }, { status: 400 });
   }
 
-  let query: string;
-  let variables: Record<string, string>;
-
-  if (body.schemaType === 'Person') {
-    query = PIN_PERSON_MUTATION;
-    variables = { name, description, image, url, email, identifier };
-  } else if (body.schemaType === 'Organization') {
-    query = PIN_ORGANIZATION_MUTATION;
-    variables = { name, description, image, url, email };
-  } else {
-    query = PIN_THING_MUTATION;
-    variables = { name, description, image, url };
-  }
-
-  let data: {
-    pinThing?: { uri?: string };
-    pinPerson?: { uri?: string };
-    pinOrganization?: { uri?: string };
-  };
-
   try {
-    data = await requestIntuitionPinGraph(query, variables);
+    if (body.schemaType === 'Thing') {
+      const uri = await requestIntuitionPinThing({ name, description, image, url });
+
+      if (!uri.startsWith('ipfs://')) {
+        return NextResponse.json({ error: 'Pin response did not include a valid ipfs:// URI.' }, { status: 502 });
+      }
+
+      return NextResponse.json({ uri });
+    }
+
+    if (body.schemaType === 'Person') {
+      const data = await requestIntuitionPinGraph<{
+        pinPerson?: { uri?: string };
+      }, Record<string, string>>(PIN_PERSON_MUTATION, { name, description, image, url, email, identifier });
+      const uri = data.pinPerson?.uri ?? '';
+
+      if (!uri.startsWith('ipfs://')) {
+        return NextResponse.json({ error: 'Pin response did not include a valid ipfs:// URI.' }, { status: 502 });
+      }
+
+      return NextResponse.json({ uri });
+    }
+
+    const data = await requestIntuitionPinGraph<{
+      pinOrganization?: { uri?: string };
+    }, Record<string, string>>(PIN_ORGANIZATION_MUTATION, { name, description, image, url, email });
+    const uri = data.pinOrganization?.uri ?? '';
+
+    if (!uri.startsWith('ipfs://')) {
+      return NextResponse.json({ error: 'Pin response did not include a valid ipfs:// URI.' }, { status: 502 });
+    }
+
+    return NextResponse.json({ uri });
   } catch (caughtError) {
     const message = caughtError instanceof Error ? caughtError.message : 'Pin request failed.';
-    const status = message.includes('INTUITION_PIN_API_KEY') ? 500 : 502;
+    const status =
+      message.includes('INTUITION_PIN_API_KEY') || message.includes('API key was rejected') ? 500 : 502;
 
     return NextResponse.json({ error: message }, { status });
   }
-
-  const uri = data.pinThing?.uri ?? data.pinPerson?.uri ?? data.pinOrganization?.uri ?? '';
-
-  if (!uri.startsWith('ipfs://')) {
-    return NextResponse.json({ error: 'Pin response did not include a valid ipfs:// URI.' }, { status: 502 });
-  }
-
-  return NextResponse.json({ uri });
 }

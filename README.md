@@ -2,6 +2,8 @@
 
 Community-facing batch tooling for Intuition protocol operations.
 
+The app uses the current `@0xintuition/sdk` and `@0xintuition/graphql` packages for protocol writes and pinning-related server requests.
+
 This standalone app currently supports:
 
 - Batch atoms
