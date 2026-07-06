@@ -24,13 +24,23 @@ function createDraft(seed = ''): AtomDraft {
   };
 }
 
-export function ManualBatchAtomsFlow() {
+type ManualAtomsFlowMode = 'single' | 'batch';
+
+function getInitialDrafts(mode: ManualAtomsFlowMode): AtomDraft[] {
+  return mode === 'batch' ? [createDraft(), createDraft()] : [createDraft()];
+}
+
+export function ManualBatchAtomsFlow({
+  mode = 'single',
+}: {
+  mode?: ManualAtomsFlowMode;
+}) {
   const { address, status: accountStatus } = useAccount();
   const chainId = useChainId();
   const { data: walletClient } = useWalletClient();
   const { network } = useSelectedNetwork();
 
-  const [drafts, setDrafts] = useState<AtomDraft[]>([createDraft()]);
+  const [drafts, setDrafts] = useState<AtomDraft[]>(() => getInitialDrafts(mode));
   const [reviewRows, setReviewRows] = useState<ManualAtomReviewRow[] | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +58,7 @@ export function ManualBatchAtomsFlow() {
   const creatableAtoms = useMemo(() => (reviewRows ? getCreatablePreparedAtoms(reviewRows) : []), [reviewRows]);
   const isSingleDraftMode = drafts.length === 1;
   const hasSingleEligibleAtom = creatableAtoms.length === 1;
+  const isSingleMode = mode === 'single';
   const publishDisabledReason = getPublishDisabledReason({
     hasReview: !!reviewRows,
     eligibleCount: creatableAtoms.length,
@@ -96,11 +107,11 @@ export function ManualBatchAtomsFlow() {
       });
 
       setReviewRows(nextRows);
-      setStatus(`Review ready. ${nextRows.filter((row) => row.status === 'ready_to_create').length} atoms can be created.`);
+      setStatus(`Review ready. ${nextRows.filter((row) => row.status === 'ready_to_create').length} ${isSingleMode ? 'atom is' : 'atoms are'} ready to create.`);
     } catch (caughtError) {
       setReviewRows(null);
       setStatus(null);
-      setError(caughtError instanceof Error ? `Atom batch review failed: ${caughtError.message}` : 'Atom batch review failed.');
+      setError(caughtError instanceof Error ? `Atom review failed: ${caughtError.message}` : 'Atom review failed.');
     } finally {
       setIsReviewing(false);
     }
@@ -108,18 +119,18 @@ export function ManualBatchAtomsFlow() {
 
   async function handlePublish() {
     if (!reviewRows || creatableAtoms.length === 0) {
-      setError('Review the batch before publishing.');
+      setError(`Review the ${isSingleMode ? 'atom' : 'atoms'} before publishing.`);
       return;
     }
 
     if (!canWrite || !walletClient || !address) {
-      setError(`Connect a wallet on ${networkConfig.name} before publishing the batch.`);
+      setError(`Connect a wallet on ${networkConfig.name} before publishing ${isSingleMode ? 'this atom' : 'the batch'}.`);
       return;
     }
 
     setIsPublishing(true);
     setError(null);
-    setStatus('Waiting for wallet approval to create the eligible atoms...');
+    setStatus(`Waiting for wallet approval to create ${isSingleMode ? 'this atom' : 'the eligible atoms'}...`);
     setWriteResult(null);
 
     try {
@@ -132,38 +143,45 @@ export function ManualBatchAtomsFlow() {
       });
 
       setWriteResult(result);
-      setStatus(`Batch confirmed. ${result.createdIds.length} atoms were created on ${networkConfig.name}.`);
+      setStatus(`${isSingleMode ? 'Atom' : 'Batch'} confirmed. ${result.createdIds.length} ${result.createdIds.length === 1 ? 'atom was' : 'atoms were'} created on ${networkConfig.name}.`);
     } catch (caughtError) {
       setStatus(null);
-      setError(caughtError instanceof Error ? `Atom batch publish failed: ${caughtError.message}` : 'Atom batch publish failed.');
+      setError(caughtError instanceof Error ? `Atom publish failed: ${caughtError.message}` : 'Atom publish failed.');
     } finally {
       setIsPublishing(false);
     }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="border border-line/80 bg-white/70 p-8 shadow-sheet">
-        <div className="space-y-8">
+    <div className="space-y-8 px-6 py-6 sm:px-8 sm:py-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-3">
-              <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Manual atoms</p>
+              <p className="text-[0.72rem] uppercase tracking-terminal text-muted">{isSingleMode ? 'Single atom' : 'Batch atoms'}</p>
               <h1 className="font-serif text-[2.6rem] leading-none tracking-[-0.05em] sm:text-[3.3rem]">
-                Create one atom fast, or build a reviewed batch when you need it.
+                {isSingleMode ? 'Create the atom you need first.' : 'Create several atoms in one reviewed pass.'}
               </h1>
               <p className="max-w-3xl text-sm leading-7 text-muted">
-                Start with a single atom draft for the common case, then add more rows whenever you want batch review,
-                duplicate detection, and one `createAtoms` transaction for every eligible atom.
+                {isSingleMode
+                  ? 'Use the fastest lane for one atom at a time. If a matching atom already exists, review will catch it before you mint a duplicate.'
+                  : 'Build up a reviewed atom batch, catch duplicates and existing atoms early, then send one `createAtoms` transaction for every eligible row.'}
               </p>
             </div>
           </div>
 
           <FlowSteps
-            steps={[
-              { label: 'Add atom details', hint: 'Fill in one atom first, then add more rows only if you need them.' },
-              { label: 'Review atoms', hint: 'Check validation, duplicates, and existing atoms before anything is submitted.' },
-              { label: 'Publish eligible atoms', hint: 'Only rows marked ready to create are included in the transaction.' },
-            ]}
+            steps={
+              isSingleMode
+                ? [
+                    { label: 'Add atom details', hint: 'Fill in the atom you want to create, including rich metadata if needed.' },
+                    { label: 'Review atom', hint: 'Check validation and whether this atom already exists before anything is submitted.' },
+                    { label: 'Publish atom', hint: 'Only a ready atom is included in the transaction.' },
+                  ]
+                : [
+                    { label: 'Add atom rows', hint: 'Start with a small batch, then add more rows when you need them.' },
+                    { label: 'Review atoms', hint: 'Check validation, duplicates, and existing atoms before anything is submitted.' },
+                    { label: 'Publish eligible atoms', hint: 'Only rows marked ready to create are included in the transaction.' },
+                  ]
+            }
           />
 
           <div className="space-y-4">
@@ -180,14 +198,16 @@ export function ManualBatchAtomsFlow() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={addDraft}
-              disabled={isReviewing || isPublishing}
-              className="inline-flex rounded-full border border-ink bg-ink px-4 py-2 text-sm text-paper transition-colors duration-150 hover:bg-[#3a2a23] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              + Add atom
-            </button>
+            {isSingleMode ? null : (
+              <button
+                type="button"
+                onClick={addDraft}
+                disabled={isReviewing || isPublishing}
+                className="inline-flex rounded-full border border-ink bg-ink px-4 py-2 text-sm text-paper transition-colors duration-150 hover:bg-[#3a2a23] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                + Add atom
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
@@ -196,7 +216,7 @@ export function ManualBatchAtomsFlow() {
               disabled={isReviewing || isPublishing}
               className="inline-flex rounded-full border border-line bg-paper/70 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isReviewing ? `Reviewing ${isSingleDraftMode ? 'atom' : 'atoms'}...` : `Review ${isSingleDraftMode ? 'atom' : 'atoms'}`}
+              {isReviewing ? `Reviewing ${isSingleMode ? 'atom' : 'atoms'}...` : `Review ${isSingleMode ? 'atom' : 'atoms'}`}
             </button>
           </div>
 
@@ -207,7 +227,7 @@ export function ManualBatchAtomsFlow() {
               <div className="space-y-2">
                 <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Publish</p>
                 <p className="text-sm leading-7 text-muted">
-                  Review comes first. Only rows marked `ready_to_create` are included in the transaction.
+                  Review comes first. Only {isSingleMode ? 'a row marked `ready_to_create` is' : 'rows marked `ready_to_create` are'} included in the transaction.
                 </p>
                 <p className="text-sm leading-7 text-muted">
                   Eligible {isSingleDraftMode ? 'atoms' : 'rows'}: <span className="text-ink">{creatableAtoms.length}</span> /{' '}
@@ -224,10 +244,12 @@ export function ManualBatchAtomsFlow() {
                 className="inline-flex rounded-full border border-[#5d8a62] bg-[#edf6ee] px-5 py-3 text-sm text-[#1f5a2d] transition-colors duration-150 hover:bg-[#dbeedc] disabled:cursor-not-allowed disabled:border-line disabled:bg-paper disabled:text-muted disabled:opacity-60"
               >
                 {isPublishing
-                  ? `Publishing ${hasSingleEligibleAtom ? 'atom' : 'batch'}...`
+                  ? `Publishing ${hasSingleEligibleAtom ? 'atom' : isSingleMode ? 'atom' : 'batch'}...`
                   : hasNetworkMismatch
                     ? 'Wrong network'
-                    : `Publish eligible ${hasSingleEligibleAtom ? 'atom' : 'atoms'}`}
+                    : isSingleMode
+                      ? 'Publish atom'
+                      : `Publish eligible ${hasSingleEligibleAtom ? 'atom' : 'atoms'}`}
               </button>
             </div>
 
@@ -250,8 +272,6 @@ export function ManualBatchAtomsFlow() {
               </div>
             ) : null}
           </div>
-        </div>
-      </div>
     </div>
   );
 }

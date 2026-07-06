@@ -18,25 +18,44 @@ function AtomResultCard({
   tone?: 'default' | 'selected';
 }) {
   const imageUrl = resolveIntuitionImageUrl(atom.image);
+  const isSelected = tone === 'selected';
 
   return (
     <div
       className={
-        tone === 'selected'
-          ? 'rounded-xl border border-success/20 bg-success/10 p-4'
-          : 'rounded-xl border border-line/80 bg-white/80 p-4'
+        isSelected
+          ? 'rounded-xl border border-[#5d8a62] bg-[#edf6ee] p-4 shadow-[0_0_0_1px_rgba(93,138,98,0.08)]'
+          : 'rounded-xl border border-line/80 bg-white/72 p-4'
       }
     >
-      <div className="flex gap-3">
-        {imageUrl ? <img src={imageUrl} alt="" className="h-12 w-12 rounded-lg border border-line/70 object-cover" /> : null}
-        <div className="space-y-1">
-          <p className="text-sm text-ink">{atom.label}</p>
-          <p className="text-[0.72rem] leading-5 text-muted">
-            {atom.type} · {atom.positionCount} positions
-          </p>
-          {atom.description ? <p className="text-[0.78rem] leading-6 text-muted">{atom.description}</p> : null}
-          <p className="break-all font-mono text-[0.72rem] leading-5 text-muted">{atom.termId}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex gap-3">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt=""
+              className={`h-12 w-12 rounded-lg object-cover ${isSelected ? 'border border-[#5d8a62]/40' : 'border border-line/70'}`}
+            />
+          ) : null}
+          <div className="space-y-1">
+            <p className={`text-sm ${isSelected ? 'font-medium text-[#1f5a2d]' : 'text-ink'}`}>{atom.label}</p>
+            <p className={`text-[0.72rem] leading-5 ${isSelected ? 'text-[#41724b]' : 'text-muted'}`}>
+              {atom.type} · {atom.positionCount} positions
+            </p>
+            {atom.description ? <p className={`text-[0.78rem] leading-6 ${isSelected ? 'text-[#41724b]' : 'text-muted'}`}>{atom.description}</p> : null}
+            <p className={`break-all font-mono text-[0.72rem] leading-5 ${isSelected ? 'text-[#41724b]' : 'text-muted'}`}>{atom.termId}</p>
+          </div>
         </div>
+
+        {isSelected ? (
+          <span className="inline-flex rounded-full border border-[#5d8a62] bg-white/80 px-3 py-1 text-[0.68rem] uppercase tracking-terminal text-[#1f5a2d]">
+            Selected
+          </span>
+        ) : (
+          <span className="inline-flex rounded-full border border-line/80 bg-paper/70 px-3 py-1 text-[0.68rem] uppercase tracking-terminal text-muted">
+            Candidate
+          </span>
+        )}
       </div>
     </div>
   );
@@ -227,7 +246,12 @@ export function ListMemberRowEditor({
 
           {isSearching ? <p className="text-sm leading-7 text-muted">Searching for matching atoms...</p> : null}
 
-          {row.selectedAtom ? <AtomResultCard atom={row.selectedAtom} tone="selected" /> : null}
+          {row.selectedAtom ? (
+            <div className="space-y-2">
+              <p className="text-[0.68rem] uppercase tracking-terminal text-[#41724b]">Chosen member atom</p>
+              <AtomResultCard atom={row.selectedAtom} tone="selected" />
+            </div>
+          ) : null}
 
           {showCreateSuggestion ? (
             <div className="rounded-xl border border-dashed border-line/80 bg-white/70 p-4">
@@ -249,13 +273,14 @@ export function ListMemberRowEditor({
 
           {results.length > 0 ? (
             <div className="space-y-3">
+              <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Search results</p>
               {results.map((result) => (
                 <button
                   key={result.termId}
                   type="button"
                   onClick={() => handleSelect(result)}
                   disabled={disabled}
-                  className="w-full text-left transition-colors duration-150 hover:opacity-95"
+                  className="w-full text-left transition-transform duration-150 hover:translate-y-[-1px]"
                 >
                   <AtomResultCard atom={result} />
                 </button>

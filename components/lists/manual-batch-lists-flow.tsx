@@ -162,9 +162,7 @@ export function ManualBatchListsFlow() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="border border-line/80 bg-white/70 p-8 shadow-sheet">
-        <div className="space-y-8">
+    <div className="space-y-8 px-6 py-6 sm:px-8 sm:py-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-3">
               <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Manual lists</p>
@@ -296,8 +294,6 @@ export function ManualBatchListsFlow() {
               </div>
             ) : null}
           </div>
-        </div>
-      </div>
     </div>
   );
 }

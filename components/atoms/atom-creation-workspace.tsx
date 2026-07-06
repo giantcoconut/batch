@@ -7,39 +7,89 @@ import { ManualBatchAtomsFlow } from '@/components/atoms/manual-batch-atoms-flow
 import { CsvBatchListsFlow } from '@/components/lists/csv-batch-lists-flow';
 import { ManualBatchListsFlow } from '@/components/lists/manual-batch-lists-flow';
 
-type CreationMode = 'manual_atoms' | 'csv_atoms' | 'manual_lists' | 'csv_lists';
+type WorkspaceSection = 'atoms' | 'lists';
+type AtomMode = 'single_atom' | 'batch_atoms' | 'csv_atoms';
+type ListMode = 'manual_lists' | 'csv_lists';
 
 export function AtomCreationWorkspace() {
-  const [mode, setMode] = useState<CreationMode>('manual_atoms');
+  const [section, setSection] = useState<WorkspaceSection>('atoms');
+  const [atomMode, setAtomMode] = useState<AtomMode>('single_atom');
+  const [listMode, setListMode] = useState<ListMode>('manual_lists');
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-[1.15rem] border border-line/80 bg-paper/70 p-3">
-        <div className="flex flex-wrap gap-2 rounded-[1.1rem] border border-line bg-white/80 p-2">
-          {([
-            ['manual_atoms', 'Atoms'],
-            ['csv_atoms', 'CSV atoms'],
-            ['manual_lists', 'Lists'],
-            ['csv_lists', 'CSV lists'],
-          ] as const).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setMode(value)}
-              className={`rounded-full px-4 py-2 text-sm transition-colors duration-150 ${
-                mode === value ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+    <div className="overflow-hidden rounded-[1.5rem] border border-line/80 bg-white/70 shadow-sheet">
+      <div className="space-y-3 px-6 py-3 sm:px-8 sm:py-4">
+        <div className="space-y-1.5">
+          <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Create</p>
+          <div className="inline-flex flex-wrap gap-1 rounded-[1.15rem] border border-line/80 bg-white p-1">
+            {([
+              ['atoms', 'Atom creation'],
+              ['lists', 'Lists'],
+            ] as const).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setSection(value)}
+                className={`rounded-[0.95rem] px-4 py-2 text-[0.95rem] transition-colors duration-150 ${
+                  section === value ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="pl-1 sm:pl-2.5">
+          <div className="space-y-1.5">
+            <p className="text-[0.72rem] uppercase tracking-terminal text-muted">
+              {section === 'atoms' ? 'Atom mode' : 'List mode'}
+            </p>
+            <div className="inline-flex flex-wrap gap-1 rounded-[1rem] border border-line/80 bg-white p-1">
+              {section === 'atoms'
+                ? ([
+                    ['single_atom', 'Single atom'],
+                    ['batch_atoms', 'Batch atoms'],
+                    ['csv_atoms', 'CSV import'],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setAtomMode(value)}
+                      className={`rounded-[0.85rem] px-3 py-1.5 text-[0.92rem] transition-colors duration-150 ${
+                        atomMode === value ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))
+                : ([
+                    ['manual_lists', 'Manual lists'],
+                    ['csv_lists', 'CSV import'],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setListMode(value)}
+                      className={`rounded-[0.85rem] px-3 py-1.5 text-[0.92rem] transition-colors duration-150 ${
+                        listMode === value ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {mode === 'manual_atoms' ? <ManualBatchAtomsFlow /> : null}
-      {mode === 'csv_atoms' ? <CsvBatchAtomsFlow /> : null}
-      {mode === 'manual_lists' ? <ManualBatchListsFlow /> : null}
-      {mode === 'csv_lists' ? <CsvBatchListsFlow /> : null}
+      <div className="px-0 py-0">
+        {section === 'atoms' && atomMode === 'single_atom' ? <ManualBatchAtomsFlow mode="single" /> : null}
+        {section === 'atoms' && atomMode === 'batch_atoms' ? <ManualBatchAtomsFlow mode="batch" /> : null}
+        {section === 'atoms' && atomMode === 'csv_atoms' ? <CsvBatchAtomsFlow /> : null}
+        {section === 'lists' && listMode === 'manual_lists' ? <ManualBatchListsFlow /> : null}
+        {section === 'lists' && listMode === 'csv_lists' ? <CsvBatchListsFlow /> : null}
+      </div>
     </div>
   );
 }

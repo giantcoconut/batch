@@ -14,8 +14,8 @@ export default function HomePage() {
             Review first. Publish Intuition batch operations with confidence.
           </h1>
           <p className="max-w-3xl text-base leading-8 text-muted sm:text-lg">
-            This standalone community app supports manual atoms, CSV atoms, manual lists, and CSV lists today, with
-            explicit review states before any write is sent.
+            This standalone community app supports single-atom creation, batch atoms, CSV import, manual lists, and CSV
+            lists today, with explicit review states before any write is sent.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
