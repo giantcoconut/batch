@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { getAddress, type Hex } from 'viem';
 import { useAccount, useChainId, useWalletClient } from 'wagmi';
 
+import { FlowSteps } from '@/components/app/flow-steps';
 import { useSelectedNetwork } from '@/components/app/network-provider';
 import { AtomDraftRowEditor } from '@/components/atoms/atom-draft-row-editor';
 import { AtomReviewTable } from '@/components/atoms/atom-review-table';
@@ -155,8 +156,15 @@ export function ManualBatchAtomsFlow() {
                 duplicate detection, and one `createAtoms` transaction for every eligible atom.
               </p>
             </div>
-
           </div>
+
+          <FlowSteps
+            steps={[
+              { label: 'Add atom details', hint: 'Fill in one atom first, then add more rows only if you need them.' },
+              { label: 'Review atoms', hint: 'Check validation, duplicates, and existing atoms before anything is submitted.' },
+              { label: 'Publish eligible atoms', hint: 'Only rows marked ready to create are included in the transaction.' },
+            ]}
+          />
 
           <div className="space-y-4">
             {drafts.map((draft, index) => (
@@ -188,7 +196,7 @@ export function ManualBatchAtomsFlow() {
               disabled={isReviewing || isPublishing}
               className="inline-flex rounded-full border border-line bg-paper/70 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isReviewing ? `Reviewing ${isSingleDraftMode ? 'atom' : 'batch'}...` : `Review ${isSingleDraftMode ? 'atom' : 'batch'}`}
+              {isReviewing ? `Reviewing ${isSingleDraftMode ? 'atom' : 'atoms'}...` : `Review ${isSingleDraftMode ? 'atom' : 'atoms'}`}
             </button>
           </div>
 
@@ -199,7 +207,7 @@ export function ManualBatchAtomsFlow() {
               <div className="space-y-2">
                 <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Publish</p>
                 <p className="text-sm leading-7 text-muted">
-                  Only rows marked `ready_to_create` are included in the transaction.
+                  Review comes first. Only rows marked `ready_to_create` are included in the transaction.
                 </p>
                 <p className="text-sm leading-7 text-muted">
                   Eligible {isSingleDraftMode ? 'atoms' : 'rows'}: <span className="text-ink">{creatableAtoms.length}</span> /{' '}
@@ -213,7 +221,7 @@ export function ManualBatchAtomsFlow() {
                   void handlePublish();
                 }}
                 disabled={!reviewRows || creatableAtoms.length === 0 || !canWrite || isPublishing || isReviewing}
-                className="inline-flex rounded-full border border-ink px-5 py-3 text-sm text-ink transition-colors duration-150 hover:bg-ink hover:text-paper disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex rounded-full border border-[#5d8a62] bg-[#edf6ee] px-5 py-3 text-sm text-[#1f5a2d] transition-colors duration-150 hover:bg-[#dbeedc] disabled:cursor-not-allowed disabled:border-line disabled:bg-paper disabled:text-muted disabled:opacity-60"
               >
                 {isPublishing
                   ? `Publishing ${hasSingleEligibleAtom ? 'atom' : 'batch'}...`

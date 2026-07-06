@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { getAddress, type Hex } from 'viem';
 import { useAccount, useChainId, useWalletClient } from 'wagmi';
 
+import { FlowSteps } from '@/components/app/flow-steps';
 import { useSelectedNetwork } from '@/components/app/network-provider';
 import { AtomSearchSelect } from '@/components/lists/atom-search-select';
 import { ListMemberRowEditor } from '@/components/lists/list-member-row-editor';
@@ -166,17 +167,25 @@ export function ManualBatchListsFlow() {
         <div className="space-y-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-3">
-              <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Manual batch lists</p>
+              <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Manual lists</p>
               <h1 className="font-serif text-[2.6rem] leading-none tracking-[-0.05em] sm:text-[3.3rem]">
-                Add existing member atoms to an existing list atom in one reviewed batch.
+                Add existing member atoms to an existing list with review before publish.
               </h1>
               <p className="max-w-3xl text-sm leading-7 text-muted">
-                Select an existing list atom, choose multiple existing member atoms, review duplicates and existing
-                entries, then publish only the missing triples in one transaction.
+                Select an existing list atom, choose one or more existing member atoms, review duplicates and existing
+                entries, then publish only the missing list entries in one transaction.
               </p>
             </div>
-
           </div>
+
+          <FlowSteps
+            steps={[
+              { label: 'Choose a list', hint: 'Select the existing list atom you want to add members to.' },
+              { label: 'Add members', hint: 'Search for one or more existing atoms to include in this list update.' },
+              { label: 'Review list entries', hint: 'See which entries are new, already present, duplicated, or incomplete.' },
+              { label: 'Publish missing entries', hint: 'Only missing list entries are sent in the transaction.' },
+            ]}
+          />
 
           <AtomSearchSelect
             label="List atom"
@@ -238,7 +247,7 @@ export function ManualBatchListsFlow() {
               disabled={isReviewing || isPublishing}
               className="inline-flex rounded-full border border-line bg-paper/70 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isReviewing ? 'Reviewing batch...' : 'Review list batch'}
+              {isReviewing ? 'Reviewing list entries...' : 'Review list entries'}
             </button>
           </div>
 
@@ -249,7 +258,7 @@ export function ManualBatchListsFlow() {
               <div className="space-y-2">
                 <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Publish</p>
                 <p className="text-sm leading-7 text-muted">
-                  Only rows marked `ready_to_create` are included in the transaction.
+                  Review comes first. Only rows marked `ready_to_create` are included in the transaction.
                 </p>
                 <p className="text-sm leading-7 text-muted">
                   Eligible rows: <span className="text-ink">{creatableEntries.length}</span> / {reviewRows?.length ?? 0}

@@ -19,7 +19,7 @@ export function AtomCreationWorkspace() {
           {([
             ['manual_atoms', 'Atoms'],
             ['csv_atoms', 'CSV atoms'],
-            ['manual_lists', 'Batch lists'],
+            ['manual_lists', 'Lists'],
             ['csv_lists', 'CSV lists'],
           ] as const).map(([value, label]) => (
             <button

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { getAddress, type Hex } from 'viem';
 import { useAccount, useChainId, useWalletClient } from 'wagmi';
 
+import { FlowSteps } from '@/components/app/flow-steps';
 import { useSelectedNetwork } from '@/components/app/network-provider';
 import { AtomSearchSelect } from '@/components/lists/atom-search-select';
 import { CsvListPreviewTable } from '@/components/lists/csv-list-preview-table';
@@ -223,8 +224,16 @@ export function CsvBatchListsFlow() {
                 then publish only the missing list entries in one transaction.
               </p>
             </div>
-
           </div>
+
+          <FlowSteps
+            steps={[
+              { label: 'Choose a list', hint: 'Select the existing list atom you want to update before importing members.' },
+              { label: 'Load CSV', hint: 'Upload a file or paste CSV text for the member rows.' },
+              { label: 'Review and resolve', hint: 'Preview rows, resolve ambiguous matches, and confirm which entries are publishable.' },
+              { label: 'Publish missing entries', hint: 'Only ready list entries are submitted. Missing or ambiguous rows stay blocked.' },
+            ]}
+          />
 
           <AtomSearchSelect
             label="List atom"
@@ -312,7 +321,7 @@ export function CsvBatchListsFlow() {
               disabled={!parsedRows || isParsing || isReviewing || isPublishing}
               className="inline-flex rounded-full border border-line bg-paper/70 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isReviewing ? 'Reviewing batch...' : 'Resolve and review'}
+              {isReviewing ? 'Reviewing list rows...' : 'Review list rows'}
             </button>
           </div>
 
@@ -339,7 +348,7 @@ export function CsvBatchListsFlow() {
               <div className="space-y-2">
                 <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Publish</p>
                 <p className="text-sm leading-7 text-muted">
-                  Only `ready_to_create` rows are included. Existing, duplicate, ambiguous, missing, and invalid rows are blocked.
+                  Review comes first. Only `ready_to_create` rows are included. Existing, duplicate, ambiguous, missing, and invalid rows are blocked.
                 </p>
                 <p className="text-sm leading-7 text-muted">
                   Eligible rows: <span className="text-ink">{creatableEntries.length}</span> / {reviewRows?.length ?? 0}
