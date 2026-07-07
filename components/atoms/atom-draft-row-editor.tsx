@@ -1,19 +1,66 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useAccount } from 'wagmi';
 
 import { useSelectedNetwork } from '@/components/app/network-provider';
 import {
+  resolveIntuitionImageUrl,
   normalizeImageUploadError,
   readImageFileAsBase64,
   uploadIntuitionImage,
   uploadIntuitionImageFromUrl,
   validateAtomImageFile,
 } from '@/lib/intuition/images';
+import { getIntuitionNetwork } from '@/lib/intuition/networks';
+import { searchAtoms } from '@/lib/intuition/search';
 import type { AtomDraft, AtomSchemaType } from '@/types/atoms';
+import type { IntuitionAtomSearchResult } from '@/types/api';
 
 function isRichSchema(schemaType: AtomSchemaType): boolean {
   return schemaType === 'Thing' || schemaType === 'Person' || schemaType === 'Organization';
+}
+
+function getLookupQuery(draft: AtomDraft): string {
+  if (isRichSchema(draft.schemaType)) {
+    return draft.name.trim();
+  }
+
+  if (draft.schemaType === 'Account') {
+    return draft.accountAddress.trim();
+  }
+
+  return draft.rawData.trim();
+}
+
+function getLookupThreshold(schemaType: AtomSchemaType): number {
+  if (schemaType === 'Raw') {
+    return 4;
+  }
+
+  if (schemaType === 'Account') {
+    return 6;
+  }
+
+  return 2;
+}
+
+function shouldUseExactLookup(schemaType: AtomSchemaType): boolean {
+  return schemaType === 'Account' || schemaType === 'Raw';
+}
+
+function isLikelyExactMatch(result: IntuitionAtomSearchResult, draft: AtomDraft, query: string): boolean {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    return false;
+  }
+
+  if (draft.schemaType === 'Account' || draft.schemaType === 'Raw') {
+    return (result.data ?? '').trim().toLowerCase() === normalizedQuery;
+  }
+
+  return result.label.trim().toLowerCase() === normalizedQuery;
 }
 
 export function AtomDraftRowEditor({
@@ -36,10 +83,65 @@ export function AtomDraftRowEditor({
   onRemove: () => void;
 }) {
   const { network } = useSelectedNetwork();
+  const { address } = useAccount();
   const [imageUploadStatus, setImageUploadStatus] = useState<'idle' | 'uploading' | 'uploaded' | 'failed'>('idle');
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
   const [selectedImageName, setSelectedImageName] = useState<string | null>(null);
+  const [lookupResults, setLookupResults] = useState<IntuitionAtomSearchResult[]>([]);
+  const [lookupStatus, setLookupStatus] = useState<'idle' | 'searching' | 'ready' | 'error'>('idle');
+  const [lookupError, setLookupError] = useState<string | null>(null);
   const uploadTokenRef = useRef(0);
+  const lookupTokenRef = useRef(0);
+  const lookupQuery = useMemo(() => getLookupQuery(draft), [draft]);
+  const networkName = getIntuitionNetwork(network).name;
+  const minimumLookupLength = getLookupThreshold(draft.schemaType);
+  const exactLookup = shouldUseExactLookup(draft.schemaType);
+  const hasLookupQuery = lookupQuery.length >= minimumLookupLength;
+
+  useEffect(() => {
+    if (!hasLookupQuery) {
+      setLookupResults([]);
+      setLookupStatus('idle');
+      setLookupError(null);
+      return;
+    }
+
+    lookupTokenRef.current += 1;
+    const lookupToken = lookupTokenRef.current;
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setLookupStatus('searching');
+      setLookupError(null);
+
+      try {
+        const results = await searchAtoms(network, lookupQuery, exactLookup, 6, address, controller.signal);
+
+        if (lookupToken !== lookupTokenRef.current) {
+          return;
+        }
+
+        setLookupResults(results);
+        setLookupStatus('ready');
+      } catch (caughtError) {
+        if (lookupToken !== lookupTokenRef.current) {
+          return;
+        }
+
+        if (caughtError instanceof DOMException && caughtError.name === 'AbortError') {
+          return;
+        }
+
+        setLookupResults([]);
+        setLookupStatus('error');
+        setLookupError(caughtError instanceof Error ? caughtError.message : 'Existing atom lookup failed.');
+      }
+    }, 300);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [address, exactLookup, hasLookupQuery, lookupQuery, network]);
 
   const setSchemaType = (schemaType: AtomSchemaType) => {
     onPatch({
@@ -338,6 +440,94 @@ export function AtomDraftRowEditor({
             className="w-full rounded-xl border border-line/80 bg-white/70 px-4 py-3 text-sm text-ink outline-none"
           />
         </label>
+      </div>
+
+      <div className="mt-5 rounded-[1.1rem] border border-dashed border-line bg-white/55 p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Existing atom lookup</p>
+            <p className="text-[0.72rem] uppercase tracking-terminal text-muted/90">{`Searching ${networkName}`}</p>
+          </div>
+          <p className="text-[0.72rem] uppercase tracking-terminal text-muted">
+            {lookupStatus === 'searching'
+              ? 'Searching...'
+              : !hasLookupQuery
+                ? `Type at least ${minimumLookupLength} characters`
+                : lookupResults.length > 0
+                  ? `${lookupResults.length} match${lookupResults.length === 1 ? '' : 'es'}`
+                  : 'Watching for matches'}
+          </p>
+        </div>
+
+        <p className="mt-3 text-sm leading-7 text-muted">
+          Similar atoms are checked automatically while you type, so creation does not start blind.
+        </p>
+
+        {lookupError ? <p className="mt-3 text-sm leading-7 text-[#8a4b38]">{lookupError}</p> : null}
+
+        {!hasLookupQuery ? (
+          <p className="mt-3 text-sm leading-7 text-muted">
+            Start typing the {draft.schemaType === 'Account' ? 'account address' : draft.schemaType === 'Raw' ? 'raw value' : 'atom name'} to
+            check whether it already exists on {networkName}.
+          </p>
+        ) : null}
+
+        {hasLookupQuery && lookupStatus === 'ready' && lookupResults.length === 0 ? (
+          <p className="mt-3 text-sm leading-7 text-muted">
+            No existing atoms matched this {draft.schemaType === 'Account' || draft.schemaType === 'Raw' ? 'exact lookup' : 'search'} yet.
+          </p>
+        ) : null}
+
+        {lookupResults.length > 0 ? (
+          <div className="mt-4 space-y-3">
+            {lookupResults.map((result) => {
+              const previewUrl = resolveIntuitionImageUrl(result.image);
+              const likelyExactMatch = isLikelyExactMatch(result, draft, lookupQuery);
+
+              return (
+                <div
+                  key={result.termId}
+                  className={
+                    likelyExactMatch
+                      ? 'rounded-xl border border-[#5d8a62]/35 bg-[#edf6ee] p-4'
+                      : 'rounded-xl border border-line/80 bg-white/80 p-4'
+                  }
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-1 gap-3">
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt=""
+                          className="h-12 w-12 shrink-0 rounded-lg border border-line/70 object-cover"
+                        />
+                      ) : null}
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm text-ink">{result.label}</p>
+                          <span
+                            className={
+                              likelyExactMatch
+                                ? 'rounded-full border border-[#5d8a62]/25 bg-white/70 px-2 py-1 text-[0.68rem] uppercase tracking-terminal text-[#1f5a2d]'
+                                : 'rounded-full border border-line/80 bg-paper/70 px-2 py-1 text-[0.68rem] uppercase tracking-terminal text-muted'
+                            }
+                          >
+                            {likelyExactMatch ? 'Likely existing match' : 'Related atom'}
+                          </span>
+                        </div>
+                        <p className="text-[0.72rem] leading-5 text-muted">
+                          {result.type} · {result.positionCount} positions
+                        </p>
+                        {result.description ? <p className="text-[0.78rem] leading-6 text-muted">{result.description}</p> : null}
+                        <p className="break-all font-mono text-[0.72rem] leading-5 text-muted">{result.termId}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
     </div>
   );
