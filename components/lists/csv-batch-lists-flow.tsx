@@ -10,6 +10,7 @@ import { AtomSearchSelect } from '@/components/lists/atom-search-select';
 import { CsvListPreviewTable } from '@/components/lists/csv-list-preview-table';
 import { ListReviewTable } from '@/components/lists/list-review-table';
 import { parseCsvListText } from '@/lib/csv/list-csv';
+import { downloadListCsvTemplate } from '@/lib/csv/templates';
 import { resolveCsvListRows, reviewCsvBatchLists } from '@/lib/intuition/csv-batch-lists';
 import {
   getCreatablePreparedListEntries,
@@ -261,10 +262,10 @@ export function CsvBatchListsFlow() {
             }}
           />
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)]">
-            <div className="space-y-3">
-              <label className="space-y-2">
-                <span className="text-sm text-muted">Paste CSV text</span>
+          <div className="grid items-stretch gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)]">
+            <div className="flex h-full flex-col rounded-[1.15rem] border border-line/80 bg-paper/65 p-5">
+              <label className="flex min-h-0 flex-1 flex-col gap-3">
+                <span className="text-[0.72rem] uppercase tracking-terminal text-muted">Paste CSV text</span>
                 <textarea
                   value={csvText}
                   onChange={(event) => {
@@ -272,7 +273,7 @@ export function CsvBatchListsFlow() {
                     resetDownstreamState();
                   }}
                   rows={12}
-                  className="w-full rounded-[1.15rem] border border-line/80 bg-paper/70 px-4 py-4 font-mono text-sm leading-7 text-ink outline-none"
+                  className="min-h-[24rem] w-full flex-1 resize-y rounded-xl border border-line/80 bg-white/70 px-4 py-4 font-mono text-sm leading-7 text-ink outline-none"
                   placeholder="member,description"
                 />
               </label>
@@ -281,17 +282,26 @@ export function CsvBatchListsFlow() {
             <div className="space-y-4 rounded-[1.15rem] border border-line/80 bg-paper/65 p-5">
               <div className="space-y-2">
                 <p className="text-[0.72rem] uppercase tracking-terminal text-muted">CSV source</p>
-                <label className="inline-flex cursor-pointer rounded-full border border-line bg-white/85 px-4 py-2 text-sm text-ink">
-                  <input
-                    type="file"
-                    accept=".csv,text/csv"
-                    className="sr-only"
-                    onChange={(event) => {
-                      void handleCsvFileChange(event.target.files?.[0] ?? null);
-                    }}
-                  />
-                  Upload CSV file
-                </label>
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex cursor-pointer rounded-full border border-line bg-white/85 px-4 py-2 text-sm text-ink">
+                    <input
+                      type="file"
+                      accept=".csv,text/csv"
+                      className="sr-only"
+                      onChange={(event) => {
+                        void handleCsvFileChange(event.target.files?.[0] ?? null);
+                      }}
+                    />
+                    Upload CSV file
+                  </label>
+                  <button
+                    type="button"
+                    onClick={downloadListCsvTemplate}
+                    className="inline-flex rounded-full border border-line bg-paper/70 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink"
+                  >
+                    Download sample
+                  </button>
+                </div>
                 <p className="text-sm leading-7 text-muted">{fileName ? `Loaded file: ${fileName}` : 'You can upload a file or paste CSV text.'}</p>
               </div>
 

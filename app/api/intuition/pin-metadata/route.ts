@@ -45,6 +45,10 @@ function isValidOptionalImageRef(value: string): boolean {
     return true;
   }
 
+  if (/^data:image\/[a-z0-9.+-]+;base64,/i.test(value)) {
+    return true;
+  }
+
   return isValidOptionalHttpUrl(value);
 }
 
@@ -77,7 +81,7 @@ export async function POST(request: NextRequest) {
 
   if (!isValidOptionalHttpUrl(url) || !isValidOptionalImageRef(image)) {
     return NextResponse.json(
-      { error: 'URL must be empty or a valid HTTPS URL. Image must be empty, a valid HTTPS URL, or an ipfs:// URI.' },
+      { error: 'URL must be empty or a valid HTTPS URL. Image must be empty, a valid HTTPS URL, data image, or an ipfs:// URI.' },
       { status: 400 },
     );
   }

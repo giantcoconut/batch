@@ -5,10 +5,10 @@ import { useAccount } from 'wagmi';
 
 import { useSelectedNetwork } from '@/components/app/network-provider';
 import {
+  getImageDataUri,
   resolveIntuitionImageUrl,
   normalizeImageUploadError,
-  readImageFileAsBase64,
-  uploadIntuitionImage,
+  prepareImageFileForUpload,
   uploadIntuitionImageFromUrl,
   validateAtomImageFile,
 } from '@/lib/intuition/images';
@@ -97,6 +97,9 @@ export function AtomDraftRowEditor({
   const minimumLookupLength = getLookupThreshold(draft.schemaType);
   const exactLookup = shouldUseExactLookup(draft.schemaType);
   const hasLookupQuery = lookupQuery.length >= minimumLookupLength;
+  const imageValue = draft.image.trim();
+  const isPreparedLocalImage = imageValue.startsWith('data:image/');
+  const imagePreviewUrl = resolveIntuitionImageUrl(imageValue);
 
   useEffect(() => {
     if (!hasLookupQuery) {
@@ -191,20 +194,15 @@ export function AtomDraftRowEditor({
     setImageUploadError(null);
 
     try {
-      const data = await readImageFileAsBase64(file);
-      const uploadedImage = await uploadIntuitionImage(network, {
-        contentType: file.type,
-        data,
-        filename: file.name || 'atom-image',
-      });
+      const preparedImage = await prepareImageFileForUpload(file);
 
       if (uploadToken !== uploadTokenRef.current) {
         return;
       }
 
-      onPatch({ image: uploadedImage.url });
+      onPatch({ image: getImageDataUri(preparedImage) });
       setImageUploadStatus('uploaded');
-      setImageUploadError(uploadedImage.safe === false ? 'Image uploaded but marked unsafe by moderation.' : null);
+      setImageUploadError(null);
     } catch (caughtError) {
       if (uploadToken !== uploadTokenRef.current) {
         return;
@@ -330,7 +328,7 @@ export function AtomDraftRowEditor({
                     onClick={() => {
                       void handleImportImageUrl();
                     }}
-                    disabled={disabled || imageUploadStatus === 'uploading'}
+                    disabled={disabled || imageUploadStatus === 'uploading' || isPreparedLocalImage}
                     className="inline-flex rounded-full border border-line bg-white/80 px-3 py-2 text-sm text-ink transition-colors duration-150 hover:border-ink/15 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {imageUploadStatus === 'uploading' ? 'Working...' : 'Import URL'}
@@ -350,21 +348,59 @@ export function AtomDraftRowEditor({
                   </label>
                 </div>
               </div>
-              <input
-                value={draft.image}
-                onChange={(event) => {
-                  onPatch({ image: event.target.value });
-                  setImageUploadStatus('idle');
-                  setImageUploadError(null);
-                }}
-                disabled={disabled}
-                placeholder="https://... or ipfs://..."
-                className="w-full rounded-xl border border-line/80 bg-white/70 px-4 py-3 text-sm text-ink outline-none"
-              />
+              {isPreparedLocalImage ? (
+                <div className="rounded-xl border border-[#5d8a62]/25 bg-[#edf6ee] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      {imagePreviewUrl ? (
+                        <img
+                          src={imagePreviewUrl}
+                          alt=""
+                          className="h-14 w-14 shrink-0 rounded-lg border border-[#5d8a62]/20 object-cover"
+                        />
+                      ) : null}
+                      <div className="space-y-1">
+                        <p className="text-sm text-[#1f5a2d]">Local image prepared</p>
+                        <p className="text-sm leading-6 text-muted">
+                          The image will be pinned inside this atom&apos;s metadata during review.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onPatch({ image: '' });
+                        setSelectedImageName(null);
+                        setImageUploadStatus('idle');
+                        setImageUploadError(null);
+                      }}
+                      disabled={disabled || imageUploadStatus === 'uploading'}
+                      className="inline-flex rounded-full border border-[#5d8a62]/30 bg-white/80 px-3 py-2 text-sm text-[#1f5a2d] transition-colors duration-150 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <input
+                  value={draft.image}
+                  onChange={(event) => {
+                    onPatch({ image: event.target.value });
+                    setImageUploadStatus('idle');
+                    setImageUploadError(null);
+                  }}
+                  disabled={disabled}
+                  placeholder="https://... or ipfs://..."
+                  className="w-full rounded-xl border border-line/80 bg-white/70 px-4 py-3 text-sm text-ink outline-none"
+                />
+              )}
               <div className="space-y-1 text-sm leading-6 text-muted">
                 <p>Upload your own image, or paste a public image URL and import it through Intuition.</p>
+                <p>Local images are resized and converted to JPG before metadata pinning.</p>
                 {selectedImageName ? <p>Selected file: {selectedImageName}</p> : null}
-                {imageUploadStatus === 'uploaded' && draft.image.trim() ? <p className="text-[#1f8a62]">Image uploaded and linked to this atom.</p> : null}
+                {imageUploadStatus === 'uploaded' && draft.image.trim() ? (
+                  <p className="text-[#1f8a62]">Image prepared and will be pinned with this atom's metadata.</p>
+                ) : null}
                 {imageUploadError ? <p className="text-[#8a4b38]">{imageUploadError}</p> : null}
               </div>
             </div>

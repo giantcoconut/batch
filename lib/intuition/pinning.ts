@@ -2,7 +2,7 @@ import { PIN_API_URL, requestPinThing as requestOfficialPinThing, type PinThingM
 
 export const INTUITION_PIN_API_URL = PIN_API_URL;
 
-function getIntuitionPinApiKey(): string {
+export function getIntuitionPinApiKey(): string {
   const apiKey = process.env.INTUITION_PIN_API_KEY?.trim();
 
   if (!apiKey) {
@@ -10,6 +10,46 @@ function getIntuitionPinApiKey(): string {
   }
 
   return apiKey;
+}
+
+export async function requestIntuitionPinGraphRaw<TData, TVariables extends Record<string, unknown>>(
+  query: string,
+  variables: TVariables,
+  signal?: AbortSignal,
+): Promise<TData> {
+  const requestInit: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: getIntuitionPinApiKey(),
+    },
+    body: JSON.stringify({ query, variables }),
+  };
+
+  if (signal) {
+    requestInit.signal = signal;
+  }
+
+  const response = await fetch(INTUITION_PIN_API_URL, requestInit);
+
+  const payload = (await response.json().catch(() => null)) as {
+    data?: TData;
+    errors?: Array<{ message?: string }>;
+    error?: string;
+    message?: string;
+  } | null;
+
+  if (!response.ok || payload?.errors?.length || !payload?.data) {
+    const message =
+      payload?.errors?.map((error) => error.message).filter(Boolean).join(' | ') ||
+      payload?.error ||
+      payload?.message ||
+      `Pinning request failed with HTTP ${response.status}.`;
+
+    throw new Error(message);
+  }
+
+  return payload.data;
 }
 
 export async function requestIntuitionPinGraph<TData, TVariables extends Record<string, unknown>>(

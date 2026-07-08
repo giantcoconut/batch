@@ -1,6 +1,8 @@
 import type { IntuitionImageUploadInput, IntuitionUploadedImage, PublicIntuitionNetwork } from '@/types/api';
 
-export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+export const MAX_IMAGE_SIZE_BYTES = 12 * 1024 * 1024;
+const MAX_PIN_IMAGE_EDGE_PX = 640;
+const PIN_IMAGE_QUALITY = 0.78;
 
 export function resolveIntuitionImageUrl(value?: string | null): string | null {
   if (!value) {
@@ -69,18 +71,22 @@ export function validateAtomImageFile(file: File): string | null {
     return 'Only image files are supported.';
   }
 
+  if (file.type === 'image/svg+xml') {
+    return 'SVG uploads are not supported here. Use a PNG or JPG image instead.';
+  }
+
   if (file.size <= 0) {
     return 'Upload failed. The image file is empty.';
   }
 
   if (file.size > MAX_IMAGE_SIZE_BYTES) {
-    return 'Image must be 5MB or smaller.';
+    return 'Image must be 12MB or smaller.';
   }
 
   return null;
 }
 
-export function readImageFileAsBase64(file: File): Promise<string> {
+export function readImageFileAsBase64(file: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -108,6 +114,88 @@ export function readImageFileAsBase64(file: File): Promise<string> {
   });
 }
 
+function loadImageFromObjectUrl(objectUrl: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Could not read this image file.'));
+    image.src = objectUrl;
+  });
+}
+
+function canvasToJpegBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error('Could not optimize this image file.'));
+          return;
+        }
+
+        resolve(blob);
+      },
+      'image/jpeg',
+      PIN_IMAGE_QUALITY,
+    );
+  });
+}
+
+function getPinnedImageFilename(fileName: string): string {
+  const trimmed = fileName.trim();
+
+  if (!trimmed) {
+    return 'atom-image.jpg';
+  }
+
+  return trimmed.replace(/\.[^.]+$/, '') + '.jpg';
+}
+
+export async function prepareImageFileForUpload(file: File): Promise<IntuitionImageUploadInput> {
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await loadImageFromObjectUrl(objectUrl);
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+
+    if (sourceWidth <= 0 || sourceHeight <= 0) {
+      throw new Error('Could not read this image file.');
+    }
+
+    const scale = Math.min(1, MAX_PIN_IMAGE_EDGE_PX / Math.max(sourceWidth, sourceHeight));
+    const width = Math.max(1, Math.round(sourceWidth * scale));
+    const height = Math.max(1, Math.round(sourceHeight * scale));
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      throw new Error('Could not optimize this image file.');
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, width, height);
+    context.drawImage(image, 0, 0, width, height);
+
+    const optimizedBlob = await canvasToJpegBlob(canvas);
+    const data = await readImageFileAsBase64(optimizedBlob);
+
+    return {
+      contentType: 'image/jpeg',
+      data,
+      filename: getPinnedImageFilename(file.name),
+    };
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+export function getImageDataUri(image: IntuitionImageUploadInput): string {
+  return `data:${image.contentType};base64,${image.data}`;
+}
+
 export function normalizeImageUploadError(caughtError: unknown): string {
   if (caughtError instanceof DOMException && caughtError.name === 'AbortError') {
     return 'Upload failed.';
@@ -115,9 +203,14 @@ export function normalizeImageUploadError(caughtError: unknown): string {
 
   if (caughtError instanceof Error && caughtError.message.trim()) {
     const message = caughtError.message.trim();
+    const lowerMessage = message.toLowerCase();
 
-    if (message.toLowerCase().includes('webhook')) {
-      return 'Intuition image upload failed upstream. Try again, or paste a public image URL and import it instead.';
+    if (lowerMessage.includes('local file upload failed through intuition image processing')) {
+      return 'Intuition could not process this local image file. Try a smaller PNG/JPG, or use Import URL with a public HTTPS image.';
+    }
+
+    if (lowerMessage.includes('webhook')) {
+      return 'Intuition image processing failed upstream. Try again, or use Import URL with a public HTTPS image.';
     }
 
     return message;

@@ -93,6 +93,16 @@ export function ManualBatchAtomsFlow({
     setWriteResult(null);
   }
 
+  function resetFlow(nextStatus?: string) {
+    setDrafts(getInitialDrafts(mode));
+    setReviewRows(null);
+    setStatus(nextStatus ?? null);
+    setError(null);
+    setWriteResult(null);
+    setIsReviewing(false);
+    setIsPublishing(false);
+  }
+
   async function handleReview() {
     setIsReviewing(true);
     setError(null);
@@ -195,6 +205,32 @@ export function ManualBatchAtomsFlow({
                 onRemove={() => removeDraft(draft.id)}
               />
             ))}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => resetFlow()}
+                disabled={isReviewing || isPublishing}
+                className="inline-flex items-center gap-2 rounded-full border border-[#c98673]/30 bg-[#fff7f4] px-4 py-2 text-sm text-[#8a4b38] transition-colors duration-150 hover:border-[#8a4b38]/35 hover:bg-[#fbe9e2] disabled:cursor-not-allowed disabled:border-line disabled:bg-white/60 disabled:text-muted disabled:opacity-60"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M8 6V4h8v2" />
+                  <path d="M6.5 6l1 14h9l1-14" />
+                  <path d="M10 10v6" />
+                  <path d="M14 10v6" />
+                </svg>
+                Clear form
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -251,6 +287,22 @@ export function ManualBatchAtomsFlow({
                       ? 'Publish atom'
                       : `Publish eligible ${hasSingleEligibleAtom ? 'atom' : 'atoms'}`}
               </button>
+              {writeResult?.txHash ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    resetFlow(
+                      isSingleMode
+                        ? 'Ready for the next atom.'
+                        : 'Ready for the next batch.',
+                    )
+                  }
+                  disabled={isReviewing || isPublishing}
+                  className="inline-flex rounded-full border border-line bg-white/80 px-5 py-3 text-sm text-ink transition-colors duration-150 hover:border-ink/15 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSingleMode ? 'Create another atom' : 'Start new batch'}
+                </button>
+              ) : null}
             </div>
 
             {publishDisabledReason ? <p className="mt-4 text-sm leading-7 text-muted">{publishDisabledReason}</p> : null}

@@ -9,6 +9,7 @@ import { useSelectedNetwork } from '@/components/app/network-provider';
 import { AtomReviewTable } from '@/components/atoms/atom-review-table';
 import { CsvAtomPreviewTable } from '@/components/atoms/csv-atom-preview-table';
 import { parseCsvAtomText } from '@/lib/csv/atom-csv';
+import { downloadBasicAtomCsvTemplate, downloadSchemaAtomCsvTemplate } from '@/lib/csv/templates';
 import { createIntuitionPublicClient } from '@/lib/intuition/public-client';
 import { getCreatablePreparedAtoms, publishManualBatchAtoms, reviewAtomDraftBatch } from '@/lib/intuition/manual-batch-atoms';
 import { getIntuitionNetwork, getIntuitionNetworkByChainId } from '@/lib/intuition/networks';
@@ -197,10 +198,10 @@ export function CsvBatchAtomsFlow() {
             ]}
           />
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)]">
-            <div className="space-y-3">
-              <label className="space-y-2">
-                <span className="text-sm text-muted">Paste CSV text</span>
+          <div className="grid items-stretch gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)]">
+            <div className="flex h-full flex-col rounded-[1.15rem] border border-line/80 bg-paper/65 p-5">
+              <label className="flex min-h-0 flex-1 flex-col gap-3">
+                <span className="text-[0.72rem] uppercase tracking-terminal text-muted">Paste CSV text</span>
                 <textarea
                   value={csvText}
                   onChange={(event) => {
@@ -208,7 +209,7 @@ export function CsvBatchAtomsFlow() {
                     resetDownstreamState();
                   }}
                   rows={12}
-                  className="w-full rounded-[1.15rem] border border-line/80 bg-paper/70 px-4 py-4 font-mono text-sm leading-7 text-ink outline-none"
+                  className="min-h-[24rem] w-full flex-1 resize-y rounded-xl border border-line/80 bg-white/70 px-4 py-4 font-mono text-sm leading-7 text-ink outline-none"
                   placeholder="name,description,image_url"
                 />
               </label>
@@ -217,17 +218,54 @@ export function CsvBatchAtomsFlow() {
             <div className="space-y-4 rounded-[1.15rem] border border-line/80 bg-paper/65 p-5">
               <div className="space-y-2">
                 <p className="text-[0.72rem] uppercase tracking-terminal text-muted">CSV source</p>
-                <label className="inline-flex cursor-pointer rounded-full border border-line bg-white/85 px-4 py-2 text-sm text-ink">
-                  <input
-                    type="file"
-                    accept=".csv,text/csv"
-                    className="sr-only"
-                    onChange={(event) => {
-                      void handleCsvFileChange(event.target.files?.[0] ?? null);
-                    }}
-                  />
-                  Upload CSV file
-                </label>
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex cursor-pointer rounded-full border border-line bg-white/85 px-4 py-2 text-sm text-ink">
+                    <input
+                      type="file"
+                      accept=".csv,text/csv"
+                      className="sr-only"
+                      onChange={(event) => {
+                        void handleCsvFileChange(event.target.files?.[0] ?? null);
+                      }}
+                    />
+                    Upload CSV file
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <details className="group relative">
+                      <summary className="inline-flex cursor-pointer list-none rounded-full border border-line bg-paper/70 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink">
+                        Download sample
+                      </summary>
+                      <div className="absolute left-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-line/80 bg-white shadow-sheet">
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.currentTarget.closest('details')?.removeAttribute('open');
+                            downloadBasicAtomCsvTemplate();
+                          }}
+                          className="block w-full px-4 py-3 text-left text-sm text-ink transition-colors duration-150 hover:bg-paper/70"
+                        >
+                          Basic atom CSV
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.currentTarget.closest('details')?.removeAttribute('open');
+                            downloadSchemaAtomCsvTemplate();
+                          }}
+                          className="block w-full border-t border-line/70 px-4 py-3 text-left text-sm text-ink transition-colors duration-150 hover:bg-paper/70"
+                        >
+                          Schema-aware CSV
+                        </button>
+                      </div>
+                    </details>
+                    <span className="group relative inline-flex h-7 w-7 items-center justify-center rounded-full border border-line bg-white/80 text-xs text-muted">
+                      ?
+                      <span className="pointer-events-none absolute right-0 top-9 z-30 hidden w-64 rounded-xl border border-line/80 bg-white p-3 text-left text-[0.72rem] leading-5 text-muted shadow-sheet group-hover:block group-focus:block">
+                        Basic is best when every row uses the selected default schema. Schema-aware includes `schema_type` for mixed atom types.
+                      </span>
+                    </span>
+                  </div>
+                </div>
                 <p className="text-sm leading-7 text-muted">{fileName ? `Loaded file: ${fileName}` : 'You can upload a file or paste CSV text.'}</p>
               </div>
 
@@ -250,8 +288,8 @@ export function CsvBatchAtomsFlow() {
               </label>
 
               <div className="space-y-2 text-sm leading-7 text-muted">
-                <p>Supported headers include `name`, `description`, `image_url`, `url`, `schema_type`, `account_address`, and `raw_data`.</p>
-                <p>Rows without an explicit `schema_type` use the selected default.</p>
+                <p>Supported headers include `name`, `description`, `url`, `image_url`, `deposit`, `schema_type`, `account_address`, `chain_id`, and `raw_data`.</p>
+                <p>Use the basic sample for one schema. Use the schema sample when rows mix Thing, Person, Organization, Account, or Raw atoms.</p>
               </div>
             </div>
           </div>

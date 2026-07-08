@@ -35,6 +35,23 @@ test('parseCsvAtomText maps schema defaults and required fields', () => {
   assert.deepEqual(result.rows[0]?.errors, []);
 });
 
+test('parseCsvAtomText accepts the basic atom template shape', () => {
+  const result = parseCsvAtomText(
+    [
+      'name,description,url,image_url,deposit',
+      'Apple,A sweet pome fruit,https://en.wikipedia.org/wiki/Apple,,0',
+    ].join('\n'),
+    'Thing',
+  );
+
+  assert.equal(result.atoms.length, 1);
+  assert.equal(result.atoms[0]?.schemaType, 'Thing');
+  assert.equal(result.atoms[0]?.name, 'Apple');
+  assert.equal(result.atoms[0]?.url, 'https://en.wikipedia.org/wiki/Apple');
+  assert.equal(result.atoms[0]?.support, '0');
+  assert.deepEqual(result.rows[0]?.errors, []);
+});
+
 test('parseCsvAtomText captures row-level validation errors without throwing', () => {
   const result = parseCsvAtomText('schema_type,account_address\nAccount,not-an-address', 'Thing');
 

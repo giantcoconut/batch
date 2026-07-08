@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { requestIntuitionPinGraph } from '@/lib/intuition/pinning';
+import { requestIntuitionPinGraphRaw } from '@/lib/intuition/pinning';
 import type { IntuitionImageUploadInput } from '@/types/api';
 
 const UPLOAD_IMAGE_MUTATION = `
@@ -30,6 +30,60 @@ function isValidImageInput(image: IntuitionImageUploadInput | undefined): image 
   return Boolean(image?.contentType?.startsWith('image/') && image.data?.trim() && image.filename?.trim());
 }
 
+function getFileDataUrl(image: IntuitionImageUploadInput): string {
+  const data = image.data.trim();
+
+  if (data.startsWith('data:')) {
+    return data;
+  }
+
+  return `data:${image.contentType};base64,${data}`;
+}
+
+function getUploadErrorMessage(caughtError: unknown): string {
+  return caughtError instanceof Error ? caughtError.message : 'Image upload failed.';
+}
+
+async function uploadImageFile(image: IntuitionImageUploadInput) {
+  try {
+    return await requestIntuitionPinGraphRaw<UploadImageResponse, { image: IntuitionImageUploadInput }>(
+      UPLOAD_IMAGE_MUTATION,
+      { image },
+    );
+  } catch (primaryError) {
+    const dataUrl = getFileDataUrl(image);
+
+    try {
+      return await requestIntuitionPinGraphRaw<UploadImageResponse, { image: { url: string } }>(
+        UPLOAD_IMAGE_FROM_URL_MUTATION,
+        { image: { url: dataUrl } },
+      );
+    } catch (fallbackError) {
+      throw new Error(
+        `Local file upload failed through Intuition image processing. Primary: ${getUploadErrorMessage(
+          primaryError,
+        )} Fallback: ${getUploadErrorMessage(fallbackError)}`,
+      );
+    }
+  }
+}
+
+type UploadImageResponse = {
+  uploadImage?: {
+    images?: Array<{
+      url?: string;
+      safe?: boolean;
+    }>;
+  };
+  uploadImageFromUrl?: {
+    images?: Array<{
+      url?: string;
+      original_url?: string;
+      safe?: boolean;
+    }>;
+  };
+};
+
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as {
     network?: string;
@@ -47,28 +101,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'A valid image upload payload or HTTPS image URL is required.' }, { status: 400 });
   }
 
-  let data: {
-    uploadImage?: {
-      images?: Array<{
-        url?: string;
-        safe?: boolean;
-      }>;
-    };
-    uploadImageFromUrl?: {
-      images?: Array<{
-        url?: string;
-        original_url?: string;
-        safe?: boolean;
-      }>;
-    };
-  };
+  let data: UploadImageResponse;
 
   try {
     data = isValidImageInput(body.image)
-      ? await requestIntuitionPinGraph(UPLOAD_IMAGE_MUTATION, { image: body.image })
-      : await requestIntuitionPinGraph(UPLOAD_IMAGE_FROM_URL_MUTATION, { image: { url: imageUrl } });
+      ? await uploadImageFile(body.image)
+      : await requestIntuitionPinGraphRaw<UploadImageResponse, { image: { url: string } }>(UPLOAD_IMAGE_FROM_URL_MUTATION, {
+          image: { url: imageUrl },
+        });
   } catch (caughtError) {
-    const message = caughtError instanceof Error ? caughtError.message : 'Image upload failed.';
+    const message = getUploadErrorMessage(caughtError);
     const status =
       message.includes('INTUITION_PIN_API_KEY') || message.includes('API key was rejected') ? 500 : 502;
 
