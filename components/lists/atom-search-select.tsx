@@ -1,10 +1,64 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { CreateAtomModal } from '@/components/atoms/create-atom-modal';
 import { searchAtoms } from '@/lib/intuition/search';
 import { resolveIntuitionImageUrl } from '@/lib/intuition/images';
+import { getIntuitionNetwork } from '@/lib/intuition/networks';
+import { normalizeSearchText } from '@/lib/utils/validation';
 import type { IntuitionAtomSearchResult, PublicIntuitionNetwork } from '@/types/api';
+
+function AtomSearchResultCard({
+  atom,
+  tone = 'default',
+}: {
+  atom: IntuitionAtomSearchResult;
+  tone?: 'default' | 'selected';
+}) {
+  const imageUrl = resolveIntuitionImageUrl(atom.image);
+  const isSelected = tone === 'selected';
+
+  return (
+    <div
+      className={
+        isSelected
+          ? 'rounded-xl border border-[#5d8a62] bg-[#edf6ee] p-4 shadow-[0_0_0_1px_rgba(93,138,98,0.08)]'
+          : 'rounded-xl border border-line/80 bg-white/72 p-4'
+      }
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex gap-3">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt=""
+              className={`h-12 w-12 rounded-lg object-cover ${isSelected ? 'border border-[#5d8a62]/40' : 'border border-line/70'}`}
+            />
+          ) : null}
+          <div className="space-y-1">
+            <p className={`text-sm ${isSelected ? 'font-medium text-[#1f5a2d]' : 'text-ink'}`}>{atom.label}</p>
+            <p className={`text-[0.72rem] leading-5 ${isSelected ? 'text-[#41724b]' : 'text-muted'}`}>
+              {atom.type} · {atom.positionCount} positions
+            </p>
+            {atom.description ? <p className={`text-[0.78rem] leading-6 ${isSelected ? 'text-[#41724b]' : 'text-muted'}`}>{atom.description}</p> : null}
+            <p className={`break-all font-mono text-[0.72rem] leading-5 ${isSelected ? 'text-[#41724b]' : 'text-muted'}`}>{atom.termId}</p>
+          </div>
+        </div>
+
+        <span
+          className={
+            isSelected
+              ? 'inline-flex rounded-full border border-[#5d8a62] bg-white/80 px-3 py-1 text-[0.68rem] uppercase tracking-terminal text-[#1f5a2d]'
+              : 'inline-flex rounded-full border border-line/80 bg-paper/70 px-3 py-1 text-[0.68rem] uppercase tracking-terminal text-muted'
+          }
+        >
+          {isSelected ? 'Selected' : 'Candidate'}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function AtomSearchSelect({
   label,
@@ -18,6 +72,8 @@ export function AtomSearchSelect({
   onQueryChange,
   onSelect,
   onClear,
+  allowCreate = false,
+  createLabel = 'list atom',
 }: {
   label: string;
   network: PublicIntuitionNetwork;
@@ -30,33 +86,89 @@ export function AtomSearchSelect({
   onQueryChange: (value: string) => void;
   onSelect: (atom: IntuitionAtomSearchResult) => void;
   onClear?: (() => void) | undefined;
+  allowCreate?: boolean | undefined;
+  createLabel?: string | undefined;
 }) {
   const [results, setResults] = useState<IntuitionAtomSearchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const searchTokenRef = useRef(0);
 
-  async function handleSearch() {
-    if (!query.trim()) {
+  const networkConfig = getIntuitionNetwork(network);
+  const normalizedQuery = useMemo(() => normalizeSearchText(query), [query]);
+
+  function handleSelect(atom: IntuitionAtomSearchResult) {
+    onSelect(atom);
+    setResults([]);
+    setError(null);
+  }
+
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+
+    if (!trimmedQuery) {
       setResults([]);
-      setError('Enter a search term first.');
-      return;
+      setError(null);
+      setIsSearching(false);
+      return undefined;
     }
 
-    setIsSearching(true);
-    setError(null);
+    searchTokenRef.current += 1;
+    const token = searchTokenRef.current;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setIsSearching(true);
+      setError(null);
 
-    try {
-      const nextResults = await searchAtoms(network, query, false, 8, preferredCreatorAddress);
-      setResults(nextResults);
+      try {
+        const nextResults = await searchAtoms(network, trimmedQuery, false, 8, preferredCreatorAddress, controller.signal);
 
-      if (nextResults.length === 0) {
-        setError('No matching atoms were found.');
+        if (token !== searchTokenRef.current) {
+          return;
+        }
+
+        setResults(nextResults);
+
+        if (nextResults.length === 0) {
+          setError(`No matching atoms were found on ${networkConfig.name}.`);
+          return;
+        }
+
+        setError(null);
+      } catch (caughtError) {
+        if (controller.signal.aborted || token !== searchTokenRef.current) {
+          return;
+        }
+
+        setResults([]);
+        setError(caughtError instanceof Error ? caughtError.message : 'Atom search failed.');
+      } finally {
+        if (token === searchTokenRef.current) {
+          setIsSearching(false);
+        }
       }
-    } catch (caughtError) {
+    }, 220);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [network, networkConfig.name, preferredCreatorAddress, query]);
+
+  const showCreateSuggestion =
+    allowCreate &&
+    !disabled &&
+    !!query.trim() &&
+    !isSearching &&
+    results.length === 0 &&
+    (!selectedAtom || normalizeSearchText(selectedAtom.label) !== normalizedQuery);
+
+  function handleQueryChange(value: string) {
+    onQueryChange(value);
+
+    if (selectedAtom && normalizeSearchText(selectedAtom.label) !== normalizeSearchText(value)) {
       setResults([]);
-      setError(caughtError instanceof Error ? caughtError.message : 'Atom search failed.');
-    } finally {
-      setIsSearching(false);
     }
   }
 
@@ -67,24 +179,14 @@ export function AtomSearchSelect({
         {helperText ? <p className="text-sm leading-7 text-muted">{helperText}</p> : null}
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <input
           value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
+          onChange={(event) => handleQueryChange(event.target.value)}
           disabled={disabled}
           placeholder={placeholder}
           className="min-w-[16rem] flex-1 rounded-xl border border-line/80 bg-white/80 px-4 py-3 text-sm text-ink outline-none"
         />
-        <button
-          type="button"
-          onClick={() => {
-            void handleSearch();
-          }}
-          disabled={disabled || isSearching}
-          className="inline-flex rounded-full border border-ink bg-ink px-4 py-2 text-sm text-paper transition-colors duration-150 hover:bg-[#3a2a23] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSearching ? 'Searching...' : 'Search atoms'}
-        </button>
         {selectedAtom && onClear ? (
           <button
             type="button"
@@ -97,22 +199,29 @@ export function AtomSearchSelect({
         ) : null}
       </div>
 
+      {query.trim() ? <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Searching {networkConfig.name}</p> : null}
+      {isSearching ? <p className="text-sm leading-7 text-muted">Searching for matching atoms...</p> : null}
+
       {selectedAtom ? (
-        <div className="rounded-xl border border-success/20 bg-success/10 p-4">
-          <div className="flex gap-3">
-            {resolveIntuitionImageUrl(selectedAtom.image) ? (
-              <img
-                src={resolveIntuitionImageUrl(selectedAtom.image) ?? undefined}
-                alt=""
-                className="h-12 w-12 rounded-lg border border-line/70 object-cover"
-              />
-            ) : null}
-            <div className="space-y-1">
-              <p className="text-sm text-ink">{selectedAtom.label}</p>
-              <p className="text-[0.72rem] leading-5 text-muted">{selectedAtom.type}</p>
-              <p className="break-all font-mono text-[0.72rem] leading-5 text-muted">{selectedAtom.termId}</p>
-            </div>
-          </div>
+        <div className="space-y-2">
+          <p className="text-[0.68rem] uppercase tracking-terminal text-[#41724b]">Chosen {createLabel}</p>
+          <AtomSearchResultCard atom={selectedAtom} tone="selected" />
+        </div>
+      ) : null}
+
+      {showCreateSuggestion ? (
+        <div className="rounded-xl border border-dashed border-line/80 bg-white/70 p-4">
+          <p className="text-sm leading-7 text-muted">
+            No atom matched this search on {networkConfig.name} yet. Create it first, then use it as the {createLabel}.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowCreateModal(true)}
+            disabled={disabled}
+            className="mt-3 inline-flex rounded-full border border-ink bg-white px-4 py-2 text-sm text-ink transition-colors duration-150 hover:bg-paper disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Create "{query.trim()}" as the {createLabel}
+          </button>
         </div>
       ) : null}
 
@@ -120,33 +229,36 @@ export function AtomSearchSelect({
 
       {results.length > 0 ? (
         <div className="space-y-3">
+          <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Search results</p>
           {results.map((result) => (
             <button
               key={result.termId}
               type="button"
-              onClick={() => onSelect(result)}
+              onClick={() => handleSelect(result)}
               disabled={disabled}
-              className="w-full rounded-xl border border-line/80 bg-white/80 p-4 text-left transition-colors duration-150 hover:border-ink/15"
+              className="w-full text-left transition-transform duration-150 hover:translate-y-[-1px]"
             >
-              <div className="flex gap-3">
-                {resolveIntuitionImageUrl(result.image) ? (
-                  <img
-                    src={resolveIntuitionImageUrl(result.image) ?? undefined}
-                    alt=""
-                    className="h-12 w-12 rounded-lg border border-line/70 object-cover"
-                  />
-                ) : null}
-                <div className="space-y-1">
-                  <p className="text-sm text-ink">{result.label}</p>
-                  <p className="text-[0.72rem] leading-5 text-muted">
-                    {result.type} · {result.positionCount} positions
-                  </p>
-                  {result.description ? <p className="text-[0.78rem] leading-6 text-muted">{result.description}</p> : null}
-                </div>
-              </div>
+              <AtomSearchResultCard atom={result} />
             </button>
           ))}
         </div>
+      ) : null}
+
+      {showCreateModal ? (
+        <CreateAtomModal
+          seed={query.trim()}
+          contextLabel={createLabel}
+          eyebrow={`Create ${createLabel}`}
+          title={`Create this atom, then use it as the ${createLabel}.`}
+          description="Fill in the atom details, publish it, and this list flow will select the created atom automatically."
+          helperText={`Start with the typed label and adjust the metadata before using it as the ${createLabel}.`}
+          createdStatus={`Atom created. Selecting it as the ${createLabel} now.`}
+          onClose={() => setShowCreateModal(false)}
+          onCreated={(atom) => {
+            handleSelect(atom);
+            setShowCreateModal(false);
+          }}
+        />
       ) : null}
     </div>
   );

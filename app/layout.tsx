@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import { ThemeProvider } from '@/components/app/theme-provider';
 import { WalletProvider } from '@/components/wallet/wallet-provider';
 import './globals.css';
 
@@ -14,7 +15,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <WalletProvider>{children}</WalletProvider>
+        <ThemeProvider>
+          <WalletProvider>{children}</WalletProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

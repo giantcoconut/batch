@@ -4,6 +4,17 @@
 
 :root {
   color-scheme: light;
+  --color-paper: 250 247 240;
+  --color-ink: 49 36 29;
+  --color-muted: 116 88 73;
+  --color-line: 224 216 204;
+  --color-accent: 162 92 62;
+  --color-accent-soft: 246 235 224;
+  --color-success: 31 138 98;
+  --color-warning: 171 116 31;
+  --color-danger: 157 68 43;
+  --color-surface: 255 255 255;
+  --color-surface-soft: 247 241 231;
 }
 
 html {
@@ -12,10 +23,49 @@ html {
     linear-gradient(180deg, #f7f3ea 0%, #f4efe4 100%);
 }
 
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --color-paper: 32 28 25;
+  --color-ink: 246 236 220;
+  --color-muted: 190 169 151;
+  --color-line: 76 64 55;
+  --color-accent: 224 146 103;
+  --color-accent-soft: 58 43 35;
+  --color-success: 118 213 156;
+  --color-warning: 228 176 82;
+  --color-danger: 230 126 98;
+  --color-surface: 39 34 30;
+  --color-surface-soft: 48 41 36;
+  background:
+    radial-gradient(circle at top, rgba(71, 53, 40, 0.88), rgba(25, 22, 20, 1) 46%),
+    linear-gradient(180deg, #1d1917 0%, #171412 100%);
+}
+
 body {
   @apply min-h-screen bg-transparent text-ink antialiased;
 }
 
 a {
   @apply text-inherit;
+}
+
+html[data-theme='dark'] [class~='bg-white'],
+html[data-theme='dark'] [class*='bg-white/'] {
+  background-color: rgb(var(--color-surface) / 0.82);
+}
+
+html[data-theme='dark'] [class~='bg-paper'],
+html[data-theme='dark'] [class*='bg-paper/'] {
+  background-color: rgb(var(--color-paper) / 0.72);
+}
+
+html[data-theme='dark'] [class*='shadow-sheet'],
+html[data-theme='dark'] [class*='shadow-['] {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme='dark'] input,
+html[data-theme='dark'] textarea,
+html[data-theme='dark'] select {
+  color-scheme: dark;
 }

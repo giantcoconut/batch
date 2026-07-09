@@ -6,6 +6,7 @@ import { useAccount, useChainId, useWalletClient } from 'wagmi';
 
 import { FlowSteps } from '@/components/app/flow-steps';
 import { useSelectedNetwork } from '@/components/app/network-provider';
+import { ClearFormButton } from '@/components/app/clear-form-button';
 import { AtomSearchSelect } from '@/components/lists/atom-search-select';
 import { CsvListPreviewTable } from '@/components/lists/csv-list-preview-table';
 import { ListReviewTable } from '@/components/lists/list-review-table';
@@ -43,6 +44,7 @@ export function CsvBatchListsFlow() {
   const [isParsing, setIsParsing] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [fileInputKey, setFileInputKey] = useState(0);
 
   const networkConfig = getIntuitionNetwork(network);
   const publicClient = useMemo(() => createIntuitionPublicClient(network), [network]);
@@ -71,6 +73,16 @@ export function CsvBatchListsFlow() {
     setStatus(null);
     setError(null);
     setWriteResult(null);
+  }
+
+  function resetFlow() {
+    setListQuery('');
+    setListAtom(null);
+    setCsvText('');
+    setFileName(null);
+    setFileInputKey((current) => current + 1);
+    resetDownstreamState();
+    setStatus('CSV list form cleared. Choose a list atom, then paste CSV text or upload a file to start again.');
   }
 
   async function handleCsvFileChange(file: File | null) {
@@ -242,7 +254,9 @@ export function CsvBatchListsFlow() {
             query={listQuery}
             placeholder="Search an existing list atom"
             disabled={isParsing || isReviewing || isPublishing}
-            helperText="CSV lists support existing list atoms only in this phase."
+            helperText="Start typing to search automatically. If the list atom does not exist yet, create it first and it will be selected here."
+            allowCreate
+            createLabel="list atom"
             onQueryChange={(value) => {
               setListQuery(value);
               if (listAtom?.label !== value) {
@@ -285,6 +299,7 @@ export function CsvBatchListsFlow() {
                 <div className="flex flex-wrap gap-2">
                   <label className="inline-flex cursor-pointer rounded-full border border-line bg-white/85 px-4 py-2 text-sm text-ink">
                     <input
+                      key={fileInputKey}
                       type="file"
                       accept=".csv,text/csv"
                       className="sr-only"
@@ -310,6 +325,10 @@ export function CsvBatchListsFlow() {
                 <p>Exact single matches auto-resolve. Ambiguous rows require manual selection. Missing rows stay blocked until removed.</p>
               </div>
             </div>
+          </div>
+
+          <div className="flex justify-end">
+            <ClearFormButton onClick={resetFlow} disabled={isParsing || isReviewing || isPublishing} />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

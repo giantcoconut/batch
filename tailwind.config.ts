@@ -10,15 +10,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper: 'oklch(0.982 0.006 85)',
-        ink: 'oklch(0.23 0.02 40)',
-        muted: 'oklch(0.55 0.02 55)',
-        line: 'oklch(0.87 0.01 70)',
-        accent: 'oklch(0.56 0.11 36)',
-        accentSoft: 'oklch(0.94 0.02 50)',
-        success: 'oklch(0.56 0.12 155)',
-        warning: 'oklch(0.62 0.13 70)',
-        danger: 'oklch(0.56 0.13 25)'
+        paper: 'rgb(var(--color-paper) / <alpha-value>)',
+        ink: 'rgb(var(--color-ink) / <alpha-value>)',
+        muted: 'rgb(var(--color-muted) / <alpha-value>)',
+        line: 'rgb(var(--color-line) / <alpha-value>)',
+        accent: 'rgb(var(--color-accent) / <alpha-value>)',
+        accentSoft: 'rgb(var(--color-accent-soft) / <alpha-value>)',
+        success: 'rgb(var(--color-success) / <alpha-value>)',
+        warning: 'rgb(var(--color-warning) / <alpha-value>)',
+        danger: 'rgb(var(--color-danger) / <alpha-value>)'
       },
       boxShadow: {
         sheet: '0 24px 80px rgba(49, 39, 24, 0.08)',

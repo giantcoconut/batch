@@ -6,6 +6,7 @@ import { useAccount, useChainId, useWalletClient } from 'wagmi';
 
 import { FlowSteps } from '@/components/app/flow-steps';
 import { useSelectedNetwork } from '@/components/app/network-provider';
+import { ClearFormButton } from '@/components/app/clear-form-button';
 import { AtomReviewTable } from '@/components/atoms/atom-review-table';
 import { CsvAtomPreviewTable } from '@/components/atoms/csv-atom-preview-table';
 import { parseCsvAtomText } from '@/lib/csv/atom-csv';
@@ -36,6 +37,7 @@ export function CsvBatchAtomsFlow() {
   const [isParsing, setIsParsing] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [fileInputKey, setFileInputKey] = useState(0);
 
   const networkConfig = getIntuitionNetwork(network);
   const publicClient = useMemo(() => createIntuitionPublicClient(network), [network]);
@@ -62,6 +64,15 @@ export function CsvBatchAtomsFlow() {
     setStatus(null);
     setError(null);
     setWriteResult(null);
+  }
+
+  function resetFlow() {
+    setDefaultSchemaType('Thing');
+    setCsvText('');
+    setFileName(null);
+    setFileInputKey((current) => current + 1);
+    resetDownstreamState();
+    setStatus('CSV atom form cleared. Paste CSV text or upload a file to start again.');
   }
 
   async function handleCsvFileChange(file: File | null) {
@@ -221,6 +232,7 @@ export function CsvBatchAtomsFlow() {
                 <div className="flex flex-wrap gap-2">
                   <label className="inline-flex cursor-pointer rounded-full border border-line bg-white/85 px-4 py-2 text-sm text-ink">
                     <input
+                      key={fileInputKey}
                       type="file"
                       accept=".csv,text/csv"
                       className="sr-only"
@@ -292,6 +304,10 @@ export function CsvBatchAtomsFlow() {
                 <p>Use the basic sample for one schema. Use the schema sample when rows mix Thing, Person, Organization, Account, or Raw atoms.</p>
               </div>
             </div>
+          </div>
+
+          <div className="flex justify-end">
+            <ClearFormButton onClick={resetFlow} disabled={isParsing || isReviewing || isPublishing} />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

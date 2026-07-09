@@ -24,10 +24,22 @@ function createModalDraft(seed: string): AtomDraft {
 
 export function CreateAtomModal({
   seed,
+  contextLabel = 'member atom',
+  eyebrow = 'Create member atom',
+  title = 'Create a missing atom without leaving this flow.',
+  description = 'Fill in the atom details, create it on Intuition, and this member row will be updated automatically.',
+  helperText = 'Start with the typed label and adjust the metadata before publishing.',
+  createdStatus = 'Atom created. Adding it to the member row now.',
   onClose,
   onCreated,
 }: {
   seed: string;
+  contextLabel?: string;
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  helperText?: string;
+  createdStatus?: string;
   onClose: () => void;
   onCreated: (atom: IntuitionAtomSearchResult) => void;
 }) {
@@ -93,8 +105,8 @@ export function CreateAtomModal({
       const createdAtom = mapPreparedAtomToSearchResult(draft, prepared, getAddress(address));
       setStatus(
         writeResult.kind === 'skipped'
-          ? 'This atom already exists. Using the existing atom as the list member.'
-          : 'Atom created. Adding it to the member row now.',
+          ? `This atom already exists. Using the existing atom as the ${contextLabel}.`
+          : createdStatus,
       );
       onCreated(createdAtom);
     } catch (caughtError) {
@@ -107,64 +119,66 @@ export function CreateAtomModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(27,18,13,0.42)] p-4">
-      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[1.4rem] border border-line/80 bg-white shadow-sheet">
-        <div className="flex items-start justify-between gap-4 border-b border-line/70 px-6 py-5">
-          <div className="space-y-2">
-            <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Create member atom</p>
-            <h2 className="font-serif text-[2rem] leading-none tracking-[-0.05em]">Create a missing atom without leaving this flow.</h2>
-            <p className="max-w-2xl text-sm leading-7 text-muted">
-              Fill in the atom details, create it on Intuition, and this member row will be updated automatically.
-            </p>
+      <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[1.65rem] border border-line/80 bg-white shadow-sheet">
+        <div className="max-h-[90vh] overflow-y-auto overscroll-contain">
+          <div className="flex items-start justify-between gap-4 border-b border-line/70 px-6 py-5">
+            <div className="space-y-2">
+              <p className="text-[0.72rem] uppercase tracking-terminal text-muted">{eyebrow}</p>
+              <h2 className="font-serif text-[2rem] leading-none tracking-[-0.05em]">{title}</h2>
+              <p className="max-w-2xl text-sm leading-7 text-muted">
+                {description}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isCreating}
+              className="inline-flex rounded-full border border-line bg-white/80 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Close
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isCreating}
-            className="inline-flex rounded-full border border-line bg-white/80 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Close
-          </button>
-        </div>
 
-        <div className="space-y-5 px-6 py-6">
-          <AtomDraftRowEditor
-            draft={draft}
-            index={0}
-            title="Member atom"
-            helperText="Start with the typed label and adjust the metadata before publishing."
-            hideRemoveButton
-            disabled={isCreating}
-            onPatch={(patch) => {
-              setDraft((current) => ({ ...current, ...patch }));
-              setStatus(null);
-              setError(null);
-            }}
-            onRemove={() => undefined}
-          />
+          <div className="space-y-5 px-6 py-6">
+            <AtomDraftRowEditor
+              draft={draft}
+              index={0}
+              title={contextLabel}
+              helperText={helperText}
+              hideRemoveButton
+              disabled={isCreating}
+              onPatch={(patch) => {
+                setDraft((current) => ({ ...current, ...patch }));
+                setStatus(null);
+                setError(null);
+              }}
+              onRemove={() => undefined}
+            />
 
-          <div className="rounded-[1.15rem] border border-line/80 bg-paper/70 p-5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-2">
-                <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Create</p>
-                <p className="text-sm leading-7 text-muted">
-                  This creates the atom first, then returns you to the list row with the created atom selected.
-                </p>
+            <div className="rounded-[1.15rem] border border-line/80 bg-paper/70 p-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="space-y-2">
+                  <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Create</p>
+                  <p className="text-sm leading-7 text-muted">
+                    This creates the atom first, then returns you to the list flow with the created atom selected.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleCreate();
+                  }}
+                  disabled={isCreating}
+                  className="inline-flex rounded-full border border-[#5d8a62] bg-[#edf6ee] px-5 py-3 text-sm text-[#1f5a2d] transition-colors duration-150 hover:bg-[#dbeedc] disabled:cursor-not-allowed disabled:border-line disabled:bg-paper disabled:text-muted disabled:opacity-60"
+                >
+                  {isCreating ? 'Creating atom...' : hasNetworkMismatch ? 'Wrong network' : 'Create atom'}
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  void handleCreate();
-                }}
-                disabled={isCreating}
-                className="inline-flex rounded-full border border-[#5d8a62] bg-[#edf6ee] px-5 py-3 text-sm text-[#1f5a2d] transition-colors duration-150 hover:bg-[#dbeedc] disabled:cursor-not-allowed disabled:border-line disabled:bg-paper disabled:text-muted disabled:opacity-60"
-              >
-                {isCreating ? 'Creating atom...' : hasNetworkMismatch ? 'Wrong network' : 'Create atom'}
-              </button>
+              {status ? <p className="mt-4 text-sm leading-7 text-muted">{status}</p> : null}
+              {error ? <p className="mt-4 text-sm leading-7 text-[#8a4b38]">{error}</p> : null}
             </div>
-
-            {status ? <p className="mt-4 text-sm leading-7 text-muted">{status}</p> : null}
-            {error ? <p className="mt-4 text-sm leading-7 text-[#8a4b38]">{error}</p> : null}
           </div>
         </div>
       </div>

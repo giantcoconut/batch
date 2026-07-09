@@ -193,7 +193,9 @@ export function ManualBatchListsFlow() {
             query={listQuery}
             placeholder="Search an existing list atom"
             disabled={isReviewing || isPublishing}
-            helperText="This phase supports existing list atoms only. Creating a new list atom can be added as a follow-up."
+            helperText="Start typing to search automatically. If the list atom does not exist yet, create it first and it will be selected here."
+            allowCreate
+            createLabel="list atom"
             onQueryChange={(value) => {
               setListQuery(value);
               if (listAtom?.label !== value) {

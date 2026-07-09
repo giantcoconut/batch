@@ -7,7 +7,7 @@ import { useSelectedNetwork } from '@/components/app/network-provider';
 import { getIntuitionNetwork, getIntuitionNetworkByChainId, INTUITION_NETWORKS } from '@/lib/intuition/networks';
 import type { PublicIntuitionNetwork } from '@/types/api';
 
-export function NetworkToggle() {
+export function NetworkToggle({ compact = false }: { compact?: boolean }) {
   const { network, setNetwork } = useSelectedNetwork();
   const { isConnected } = useAccount();
   const chainId = useChainId();
@@ -58,7 +58,7 @@ export function NetworkToggle() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className={compact ? 'inline-flex' : 'space-y-2'}>
       <div className="inline-flex rounded-full border border-line bg-white/85 p-1">
         {(Object.keys(INTUITION_NETWORKS) as PublicIntuitionNetwork[]).map((option) => (
           <button
@@ -77,7 +77,7 @@ export function NetworkToggle() {
           </button>
         ))}
       </div>
-      <p className={`max-w-[22rem] text-xs leading-5 ${error ? 'text-[#a33a2b]' : 'text-muted'}`}>{helperText}</p>
+      {compact ? null : <p className={`max-w-[22rem] text-xs leading-5 ${error ? 'text-[#a33a2b]' : 'text-muted'}`}>{helperText}</p>}
     </div>
   );
 }
