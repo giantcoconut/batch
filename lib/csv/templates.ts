@@ -1,8 +1,8 @@
 const BASIC_ATOM_CSV_TEMPLATE = [
   'name,description,url,image_url,deposit',
-  'Saulo,Intuition contributor and protocol builder,https://x.com/saulodigital,https://unavatar.io/x/saulodigital,0',
-  'Zet,Intuition contributor and protocol builder,https://x.com/olivierjeremie,https://unavatar.io/x/olivierjeremie,0',
-  'Pixi3,Intuition contributor and community builder,https://x.com/0xPixi3,https://unavatar.io/x/0xPixi3,0',
+  'Saulo,Professional rabbit-hole opener who can turn one protocol idea into twelve before lunch,https://x.com/saulodigital,https://unavatar.io/x/saulodigital,0',
+  'Zet,Knowledge graph wizard making impossible protocol ideas look like routine Tuesday work,https://x.com/olivierjeremie,https://unavatar.io/x/olivierjeremie,0',
+  'Pixi3,Chief vibe architect keeping the community curious chaotic and extremely online,https://x.com/0xPixi3,https://unavatar.io/x/0xPixi3,0',
 ].join('\n');
 
 const SCHEMA_ATOM_CSV_TEMPLATE = [

@@ -4,6 +4,8 @@ import { useAccount, useChainId } from 'wagmi';
 
 import { useSelectedNetwork } from '@/components/app/network-provider';
 import { NetworkBadge } from '@/components/app/network-badge';
+import { useEnsProfile } from '@/components/wallet/use-ens-profile';
+import { WalletIdentityAvatar } from '@/components/wallet/wallet-identity-avatar';
 import { getIntuitionNetwork, getIntuitionNetworkByChainId } from '@/lib/intuition/networks';
 import { formatAddress } from '@/lib/utils/format';
 
@@ -12,6 +14,7 @@ export function SessionSidebar() {
   const chainId = useChainId();
   const { network: selectedNetwork } = useSelectedNetwork();
   const network = getIntuitionNetworkByChainId(chainId ?? null);
+  const { data: ensProfile } = useEnsProfile(address);
 
   return (
     <aside className="border border-line/80 bg-white/70 p-6 shadow-sheet xl:sticky xl:top-24">
@@ -27,7 +30,17 @@ export function SessionSidebar() {
         </div>
         <div className="rounded-[1.05rem] border border-line/80 bg-paper/70 p-4">
           <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Wallet</p>
-          <p className="mt-2 text-sm leading-6 text-ink">{isConnected ? formatAddress(address ?? null) : 'Not connected'}</p>
+          {isConnected && address ? (
+            <div className="mt-3 flex min-w-0 items-center gap-3">
+              <WalletIdentityAvatar address={address} size={34} />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium leading-6 text-ink">{ensProfile?.name ?? formatAddress(address)}</p>
+                {ensProfile?.name ? <p className="truncate font-mono text-[0.68rem] text-muted">{formatAddress(address)}</p> : null}
+              </div>
+            </div>
+          ) : (
+            <p className="mt-2 text-sm leading-6 text-ink">Not connected</p>
+          )}
         </div>
         <div className="rounded-[1.05rem] border border-line/80 bg-paper/70 p-4">
           <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Wallet network</p>

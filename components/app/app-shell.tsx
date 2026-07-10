@@ -14,12 +14,12 @@ const NAV_ITEMS = [
   { href: '/docs', label: 'Docs' },
 ];
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, fullBleed = false }: { children: ReactNode; fullBleed?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-[92rem] px-5 pb-16 pt-8 sm:px-8 sm:pt-10">
-      <header className="mb-10 grid items-center gap-4 lg:grid-cols-[minmax(18rem,1fr)_auto_minmax(18rem,1fr)]">
+    <div className={`mx-auto min-h-screen w-full pb-16 pt-8 sm:pt-10 ${fullBleed ? 'max-w-none px-0' : 'max-w-[92rem] px-5 sm:px-8'}`}>
+      <header className={`mb-10 grid items-center gap-4 lg:grid-cols-[minmax(18rem,1fr)_auto_minmax(18rem,1fr)] ${fullBleed ? 'px-5 sm:px-8' : ''}`}>
         <div className="space-y-1 justify-self-center text-center lg:justify-self-start lg:text-left">
           <Link href="/" className="text-[0.72rem] uppercase tracking-terminal text-muted">
             Intuition Batch Tool
@@ -40,14 +40,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
                 className={`inline-flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm transition-colors duration-150 sm:flex-none sm:px-5 ${
-                  isActive ? 'bg-[#b9f49c] font-medium text-[#102014]' : 'text-ink hover:bg-paper/70'
+                  isActive ? 'bg-accent font-medium text-black' : 'text-ink hover:bg-paper/70'
                 }`}
               >
                 {item.label}
                 {item.badge ? (
                   <span
                     className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-xs ${
-                      isActive ? 'bg-[#102014] text-[#b9f49c]' : 'bg-paper text-muted'
+                      isActive ? 'bg-black text-accent' : 'bg-paper text-muted'
                     }`}
                   >
                     {item.badge}

@@ -4,41 +4,41 @@
 
 :root {
   color-scheme: light;
-  --color-paper: 250 247 240;
-  --color-ink: 49 36 29;
-  --color-muted: 116 88 73;
-  --color-line: 224 216 204;
-  --color-accent: 162 92 62;
-  --color-accent-soft: 246 235 224;
-  --color-success: 31 138 98;
-  --color-warning: 171 116 31;
-  --color-danger: 157 68 43;
+  --color-paper: 248 248 248;
+  --color-ink: 26 26 26;
+  --color-muted: 102 102 102;
+  --color-line: 230 230 230;
+  --color-accent: 170 255 0;
+  --color-accent-soft: 244 255 224;
+  --color-success: 76 175 80;
+  --color-warning: 255 149 0;
+  --color-danger: 255 59 48;
   --color-surface: 255 255 255;
-  --color-surface-soft: 247 241 231;
+  --color-surface-soft: 245 245 245;
 }
 
 html {
   background:
-    radial-gradient(circle at top, rgba(241, 229, 208, 0.95), rgba(248, 244, 236, 1) 42%),
-    linear-gradient(180deg, #f7f3ea 0%, #f4efe4 100%);
+    radial-gradient(circle at top, rgba(247, 247, 247, 0.95), rgba(255, 255, 255, 1) 42%),
+    linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
 }
 
 html[data-theme='dark'] {
   color-scheme: dark;
-  --color-paper: 32 28 25;
-  --color-ink: 246 236 220;
-  --color-muted: 190 169 151;
-  --color-line: 76 64 55;
-  --color-accent: 224 146 103;
-  --color-accent-soft: 58 43 35;
-  --color-success: 118 213 156;
-  --color-warning: 228 176 82;
-  --color-danger: 230 126 98;
-  --color-surface: 39 34 30;
-  --color-surface-soft: 48 41 36;
+  --color-paper: 26 26 26;
+  --color-ink: 245 245 245;
+  --color-muted: 170 170 170;
+  --color-line: 51 51 51;
+  --color-accent: 170 255 0;
+  --color-accent-soft: 35 45 18;
+  --color-success: 170 255 0;
+  --color-warning: 255 149 0;
+  --color-danger: 255 59 48;
+  --color-surface: 42 42 42;
+  --color-surface-soft: 51 51 51;
   background:
-    radial-gradient(circle at top, rgba(71, 53, 40, 0.88), rgba(25, 22, 20, 1) 46%),
-    linear-gradient(180deg, #1d1917 0%, #171412 100%);
+    radial-gradient(circle at top, rgba(42, 42, 42, 0.88), rgba(26, 26, 26, 1) 46%),
+    linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
 }
 
 body {
@@ -68,4 +68,76 @@ html[data-theme='dark'] input,
 html[data-theme='dark'] textarea,
 html[data-theme='dark'] select {
   color-scheme: dark;
+}
+
+.home-glow {
+  background:
+    radial-gradient(circle at 25% 60%, rgba(170, 255, 0, 0.9), transparent 34%),
+    radial-gradient(circle at 72% 45%, rgba(255, 83, 160, 0.72), transparent 38%),
+    radial-gradient(circle at 50% 82%, rgba(255, 171, 64, 0.82), transparent 42%);
+}
+
+.home-pipeline {
+  isolation: isolate;
+}
+
+@keyframes home-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes home-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(4deg);
+  }
+}
+
+@keyframes home-float-slow {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(-4deg);
+  }
+}
+
+.home-reveal {
+  animation: home-reveal 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.home-board {
+  animation: home-reveal 750ms 120ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.home-float {
+  animation: home-float 6s ease-in-out infinite;
+}
+
+.home-float-slow {
+  animation: home-float-slow 7.5s ease-in-out infinite;
+}
+
+html[data-theme='dark'] .home-glow {
+  opacity: 0.72;
+  filter: saturate(0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-reveal,
+  .home-board,
+  .home-float,
+  .home-float-slow {
+    animation: none;
+  }
 }

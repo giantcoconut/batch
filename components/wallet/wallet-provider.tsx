@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import { WagmiProvider } from 'wagmi';
 
 import { SelectedNetworkProvider } from '@/components/app/network-provider';
+import { WalletIdentityAvatar } from '@/components/wallet/wallet-identity-avatar';
 import { walletConfig } from '@/lib/intuition/wallet-config';
 
 const rainbowTheme = lightTheme({
@@ -28,21 +29,7 @@ function WalletAvatar({
   ensImage?: string | null;
   size: number;
 }) {
-  if (ensImage) {
-    return <img src={ensImage} alt={`${address} avatar`} width={size} height={size} className="rounded-full object-cover" />;
-  }
-
-  return (
-    <div
-      className="flex items-center justify-center rounded-full bg-[#efe7d8] text-[#231714]"
-      style={{ width: size, height: size }}
-      aria-hidden="true"
-    >
-      <span style={{ fontSize: Math.max(12, Math.floor(size * 0.38)), lineHeight: 1 }}>
-        {address.slice(2, 4).toUpperCase()}
-      </span>
-    </div>
-  );
+  return <WalletIdentityAvatar address={address as `0x${string}`} ensImage={ensImage} size={size} />;
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
