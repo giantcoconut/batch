@@ -15,7 +15,7 @@ export function NetworkToggle({ compact = false }: { compact?: boolean }) {
   const [error, setError] = useState<string | null>(null);
 
   const walletNetwork = getIntuitionNetworkByChainId(chainId ?? null);
-  const mismatch = isConnected && walletNetwork !== null && walletNetwork.key !== network;
+  const mismatch = isConnected && walletNetwork?.key !== network;
 
   const helperText = useMemo(() => {
     if (error) {
@@ -68,7 +68,7 @@ export function NetworkToggle({ compact = false }: { compact?: boolean }) {
               void handleSelect(option);
             }}
             disabled={isPending}
-            className={`rounded-full px-4 py-2 text-sm transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-70 ${
+            className={`rounded-full px-3 py-2 text-sm transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-70 sm:px-4 ${
               network === option ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
             }`}
             aria-pressed={network === option}

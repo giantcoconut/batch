@@ -17,7 +17,7 @@ export function SessionSidebar() {
   const { data: ensProfile } = useEnsProfile(address);
 
   return (
-    <aside className="border border-line/80 bg-white/70 p-6 shadow-sheet xl:sticky xl:top-24">
+    <aside className="border border-line bg-white/82 p-6 xl:sticky xl:top-24">
       <div className="space-y-5">
         <div className="space-y-2">
           <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Session</p>

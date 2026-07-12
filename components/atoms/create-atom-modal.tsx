@@ -119,7 +119,7 @@ export function CreateAtomModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(27,18,13,0.42)] p-4">
-      <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[1.65rem] border border-line/80 bg-white shadow-sheet">
+      <div className="modal-elevation max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[1.65rem] border border-line/80 bg-white">
         <div className="max-h-[90vh] overflow-y-auto overscroll-contain">
           <div className="flex items-start justify-between gap-4 border-b border-line/70 px-6 py-5">
             <div className="space-y-2">

@@ -35,8 +35,8 @@ const wallets: WalletList = [
 ];
 
 const config: ReturnType<typeof getDefaultConfig> = getDefaultConfig({
-  appName: 'Intuition Batch Tool',
-  appDescription: 'Batch create atoms and publish list entries on Intuition.',
+  appName: 'Collate',
+  appDescription: 'Review-first community tools for creating atoms and lists on Intuition.',
   appUrl: process.env.NEXT_PUBLIC_APP_URL?.trim() || 'http://localhost:3000',
   projectId: walletConnectProjectId || 'missing-walletconnect-project-id',
   chains: [INTUITION_CHAINS.testnet, INTUITION_CHAINS.mainnet],

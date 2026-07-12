@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024" fill="none">
+  <style>
+    @font-face {
+      font-family: Geist;
+      src: url('../fonts/geist-variable.ttf') format('truetype');
+      font-weight: 100 900;
+    }
+    .ui { font-family: Geist, Arial, sans-serif; }
+    [fill="#AAFF00"] { fill: #8DF1C9; }
+    [stroke="#AAFF00"] { stroke: #8DF1C9; }
+  </style>
+
+  <rect width="1536" height="1024" fill="#F3F3F1" />
+
+  <text class="ui" x="64" y="72" fill="#171717" font-size="19" font-weight="650" letter-spacing="-0.2">COLLATE — LOGO EXPLORATION</text>
+  <text class="ui" x="1472" y="72" fill="#777777" font-size="15" text-anchor="end">many inputs · one intentional output</text>
+
+  <!-- Concept 01 -->
+  <g transform="translate(48 120)">
+    <rect width="448" height="824" rx="28" fill="#FFFFFF" />
+    <text class="ui" x="30" y="44" fill="#8A8A8A" font-size="13" font-weight="600" letter-spacing="1.8">01 / CONVERGENCE</text>
+
+    <g transform="translate(105 118)">
+      <path d="M20 28C76 28 62 103 106 104C128 104 125 91 142 91" stroke="#171717" stroke-width="11" stroke-linecap="round" />
+      <path d="M20 91C66 91 71 62 105 65C130 68 122 91 142 91" stroke="#171717" stroke-width="11" stroke-linecap="round" />
+      <path d="M20 154C76 154 64 80 106 78C128 77 125 91 142 91" stroke="#171717" stroke-width="11" stroke-linecap="round" />
+      <path d="M140 91H158" stroke="#171717" stroke-width="11" />
+      <circle cx="170" cy="91" r="14" fill="#AAFF00" />
+      <path d="M184 91H226" stroke="#AAFF00" stroke-width="11" stroke-linecap="round" />
+    </g>
+
+    <g transform="translate(72 360)">
+      <g transform="translate(0 8) scale(.35)">
+        <path d="M20 28C76 28 62 103 106 104C128 104 125 91 142 91" stroke="#171717" stroke-width="11" stroke-linecap="round" />
+        <path d="M20 91C66 91 71 62 105 65C130 68 122 91 142 91" stroke="#171717" stroke-width="11" stroke-linecap="round" />
+        <path d="M20 154C76 154 64 80 106 78C128 77 125 91 142 91" stroke="#171717" stroke-width="11" stroke-linecap="round" />
+        <path d="M140 91H158" stroke="#171717" stroke-width="11" />
+        <circle cx="170" cy="91" r="14" fill="#AAFF00" />
+        <path d="M184 91H226" stroke="#AAFF00" stroke-width="11" stroke-linecap="round" />
+      </g>
+      <text class="ui" x="98" y="62" fill="#171717" font-size="58" font-weight="650" letter-spacing="-3.5">collate</text>
+      <circle cx="289" cy="56" r="6" fill="#AAFF00" />
+    </g>
+
+    <text class="ui" x="30" y="520" fill="#171717" font-size="20" font-weight="620">Soft threads become one stream.</text>
+    <text class="ui" x="30" y="552" fill="#777777" font-size="15">Human, fluid, and closest to the original metaphor.</text>
+
+    <g transform="translate(20 620)">
+      <rect width="408" height="184" rx="18" fill="#171717" />
+      <g transform="translate(28 62) scale(.25)">
+        <path d="M20 28C76 28 62 103 106 104C128 104 125 91 142 91" stroke="#F4F4F1" stroke-width="13" stroke-linecap="round" />
+        <path d="M20 91C66 91 71 62 105 65C130 68 122 91 142 91" stroke="#F4F4F1" stroke-width="13" stroke-linecap="round" />
+        <path d="M20 154C76 154 64 80 106 78C128 77 125 91 142 91" stroke="#F4F4F1" stroke-width="13" stroke-linecap="round" />
+        <path d="M140 91H158" stroke="#F4F4F1" stroke-width="13" />
+        <circle cx="170" cy="91" r="14" fill="#AAFF00" />
+        <path d="M184 91H226" stroke="#AAFF00" stroke-width="13" stroke-linecap="round" />
+      </g>
+      <text class="ui" x="100" y="105" fill="#F4F4F1" font-size="35" font-weight="640" letter-spacing="-2">collate</text>
+      <circle cx="213" cy="101" r="4.5" fill="#AAFF00" />
+      <rect x="290" y="73" width="88" height="38" rx="19" fill="#AAFF00" />
+      <text class="ui" x="334" y="97" fill="#111111" font-size="12" font-weight="650" text-anchor="middle">CREATE</text>
+    </g>
+  </g>
+
+  <!-- Concept 02 -->
+  <g transform="translate(544 120)">
+    <rect width="448" height="824" rx="28" fill="#FFFFFF" />
+    <text class="ui" x="30" y="44" fill="#8A8A8A" font-size="13" font-weight="600" letter-spacing="1.8">02 / ORDERED LINES</text>
+
+    <g transform="translate(108 128)" stroke-linecap="round">
+      <path d="M18 24H146" stroke="#171717" stroke-width="12" />
+      <path d="M54 68H146" stroke="#171717" stroke-width="12" />
+      <path d="M32 112H146" stroke="#171717" stroke-width="12" />
+      <path d="M75 156H146" stroke="#171717" stroke-width="12" />
+      <path d="M164 14V166" stroke="#AAFF00" stroke-width="12" />
+      <path d="M170 90H226" stroke="#AAFF00" stroke-width="12" />
+    </g>
+
+    <g transform="translate(68 360)">
+      <g transform="translate(0 12) scale(.34)" stroke-linecap="round">
+        <path d="M18 24H146" stroke="#171717" stroke-width="12" />
+        <path d="M54 68H146" stroke="#171717" stroke-width="12" />
+        <path d="M32 112H146" stroke="#171717" stroke-width="12" />
+        <path d="M75 156H146" stroke="#171717" stroke-width="12" />
+        <path d="M164 14V166" stroke="#AAFF00" stroke-width="12" />
+        <path d="M170 90H226" stroke="#AAFF00" stroke-width="12" />
+      </g>
+      <text class="ui" x="100" y="62" fill="#171717" font-size="58" font-weight="650" letter-spacing="-3.5">collate</text>
+      <circle cx="291" cy="56" r="6" fill="#AAFF00" />
+    </g>
+
+    <text class="ui" x="30" y="520" fill="#171717" font-size="20" font-weight="620">Scattered rows become ordered.</text>
+    <text class="ui" x="30" y="552" fill="#777777" font-size="15">Sharper, more systematic, and distinctly software-led.</text>
+
+    <g transform="translate(20 620)">
+      <rect width="408" height="184" rx="18" fill="#171717" />
+      <g transform="translate(28 64) scale(.25)" stroke-linecap="round">
+        <path d="M18 24H146" stroke="#F4F4F1" stroke-width="14" />
+        <path d="M54 68H146" stroke="#F4F4F1" stroke-width="14" />
+        <path d="M32 112H146" stroke="#F4F4F1" stroke-width="14" />
+        <path d="M75 156H146" stroke="#F4F4F1" stroke-width="14" />
+        <path d="M164 14V166" stroke="#AAFF00" stroke-width="14" />
+        <path d="M170 90H226" stroke="#AAFF00" stroke-width="14" />
+      </g>
+      <text class="ui" x="100" y="105" fill="#F4F4F1" font-size="35" font-weight="640" letter-spacing="-2">collate</text>
+      <circle cx="213" cy="101" r="4.5" fill="#AAFF00" />
+      <rect x="290" y="73" width="88" height="38" rx="19" fill="#AAFF00" />
+      <text class="ui" x="334" y="97" fill="#111111" font-size="12" font-weight="650" text-anchor="middle">CREATE</text>
+    </g>
+  </g>
+
+  <!-- Concept 03 -->
+  <g transform="translate(1040 120)">
+    <rect width="448" height="824" rx="28" fill="#FFFFFF" />
+    <text class="ui" x="30" y="44" fill="#8A8A8A" font-size="13" font-weight="600" letter-spacing="1.8">03 / COLLATE POINT</text>
+
+    <g transform="translate(112 128)" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="22" cy="34" r="9" fill="#171717" />
+      <circle cx="22" cy="90" r="9" fill="#171717" />
+      <circle cx="22" cy="146" r="9" fill="#171717" />
+      <path d="M39 34H78L142 90" stroke="#171717" stroke-width="10" />
+      <path d="M39 90H142" stroke="#171717" stroke-width="10" />
+      <path d="M39 146H78L142 90" stroke="#171717" stroke-width="10" />
+      <circle cx="154" cy="90" r="14" fill="#AAFF00" stroke="#171717" stroke-width="5" />
+      <path d="M168 90H218" stroke="#AAFF00" stroke-width="10" />
+    </g>
+
+    <g transform="translate(72 360)">
+      <g transform="translate(0 10) scale(.34)" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="22" cy="34" r="9" fill="#171717" />
+        <circle cx="22" cy="90" r="9" fill="#171717" />
+        <circle cx="22" cy="146" r="9" fill="#171717" />
+        <path d="M39 34H78L142 90" stroke="#171717" stroke-width="10" />
+        <path d="M39 90H142" stroke="#171717" stroke-width="10" />
+        <path d="M39 146H78L142 90" stroke="#171717" stroke-width="10" />
+        <circle cx="154" cy="90" r="14" fill="#AAFF00" stroke="#171717" stroke-width="5" />
+        <path d="M168 90H218" stroke="#AAFF00" stroke-width="10" />
+      </g>
+      <text class="ui" x="98" y="62" fill="#171717" font-size="58" font-weight="650" letter-spacing="-3.5">collate</text>
+      <circle cx="289" cy="56" r="6" fill="#AAFF00" />
+    </g>
+
+    <text class="ui" x="30" y="520" fill="#171717" font-size="20" font-weight="620">Inputs meet at one deliberate point.</text>
+    <text class="ui" x="30" y="552" fill="#777777" font-size="15">Most compact, technical, and strongest at favicon size.</text>
+
+    <g transform="translate(20 620)">
+      <rect width="408" height="184" rx="18" fill="#171717" />
+      <g transform="translate(29 64) scale(.25)" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="22" cy="34" r="9" fill="#F4F4F1" />
+        <circle cx="22" cy="90" r="9" fill="#F4F4F1" />
+        <circle cx="22" cy="146" r="9" fill="#F4F4F1" />
+        <path d="M39 34H78L142 90" stroke="#F4F4F1" stroke-width="12" />
+        <path d="M39 90H142" stroke="#F4F4F1" stroke-width="12" />
+        <path d="M39 146H78L142 90" stroke="#F4F4F1" stroke-width="12" />
+        <circle cx="154" cy="90" r="14" fill="#AAFF00" stroke="#171717" stroke-width="5" />
+        <path d="M168 90H218" stroke="#AAFF00" stroke-width="12" />
+      </g>
+      <text class="ui" x="100" y="105" fill="#F4F4F1" font-size="35" font-weight="640" letter-spacing="-2">collate</text>
+      <circle cx="213" cy="101" r="4.5" fill="#AAFF00" />
+      <rect x="290" y="73" width="88" height="38" rx="19" fill="#AAFF00" />
+      <text class="ui" x="334" y="97" fill="#111111" font-size="12" font-weight="650" text-anchor="middle">CREATE</text>
+    </g>
+  </g>
+</svg>

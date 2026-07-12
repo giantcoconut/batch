@@ -232,7 +232,7 @@ export function DocsPageContent() {
           <div className="mt-8 rounded-xl border border-line/80 bg-white/70 p-4">
             <p className="text-[0.68rem] uppercase tracking-terminal text-muted">Operator preview</p>
             <p className="mt-3 text-sm leading-6 text-muted">
-              This page documents the current batch tool while the fuller community docs are still being shaped.
+              This page documents Collate's current tools while the fuller community docs are still being shaped.
             </p>
           </div>
         </aside>

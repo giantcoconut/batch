@@ -46,57 +46,65 @@ function ArrowIcon() {
 
 function ReviewBoard() {
   return (
-    <div className="home-visual relative mx-auto mt-14 h-[25rem] w-full max-w-5xl sm:h-[28rem]">
-      <div className="home-glow absolute inset-x-[5%] top-10 h-72 rounded-[50%] blur-3xl sm:inset-x-[12%]" />
+    <div className="home-visual relative mx-auto mt-10 w-full max-w-6xl sm:mt-14">
+      <div className="home-glow pointer-events-none absolute inset-x-[-8%] top-1/2 h-72 -translate-y-1/2 rounded-[50%] blur-3xl sm:inset-x-[4%]" />
 
-      <div className="home-float-slow absolute left-[3%] top-28 hidden w-52 -rotate-6 rounded-[1.4rem] border border-white/50 bg-white/75 p-4 shadow-[0_30px_80px_rgba(27,20,40,0.14)] backdrop-blur-xl md:block">
-        <div className="flex items-center justify-between">
-          <span className="text-[0.62rem] uppercase tracking-terminal text-muted">Duplicate check</span>
-          <span className="h-2.5 w-2.5 rounded-full bg-warning" />
-        </div>
-        <p className="mt-8 text-sm font-medium text-ink">Nothing accidental gets through.</p>
-      </div>
-
-      <div className="home-float absolute right-[4%] top-4 hidden w-48 rotate-6 rounded-[1.4rem] border border-white/50 bg-ink p-4 text-paper shadow-[0_30px_80px_rgba(27,20,40,0.2)] md:block">
-        <p className="text-[0.62rem] uppercase tracking-terminal text-paper/55">Transaction</p>
-        <p className="mt-8 font-serif text-3xl leading-none">2 ready</p>
-        <p className="mt-2 text-xs text-paper/60">1 safely skipped</p>
-      </div>
-
-      <div className="home-board absolute left-1/2 top-12 w-[min(92%,42rem)] -translate-x-1/2 overflow-hidden rounded-[1.6rem] border border-white/60 bg-white/88 shadow-[0_40px_110px_rgba(45,25,55,0.2)] backdrop-blur-2xl">
-        <div className="flex items-center justify-between border-b border-line/70 px-5 py-4 sm:px-6">
-          <div>
-            <p className="text-[0.62rem] uppercase tracking-terminal text-muted">Review queue</p>
-            <p className="mt-1 text-sm font-medium text-ink">Your batch before it reaches the chain</p>
-          </div>
-          <span className="rounded-full bg-accentSoft px-3 py-1 text-xs font-medium text-ink">2 eligible</span>
-        </div>
-
-        <div className="divide-y divide-line/60 px-3 sm:px-4">
-          {reviewRows.map((row, index) => (
-            <div key={row.name} className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 px-2 py-4 sm:grid-cols-[2.5rem_minmax(0,1fr)_7rem_auto]">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-paper text-xs text-muted">
-                {index + 1}
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-ink">{row.name}</p>
-                <p className="mt-0.5 text-xs text-muted sm:hidden">{row.type}</p>
-              </div>
-              <span className="hidden text-xs text-muted sm:block">{row.type}</span>
-              <span
-                className={`rounded-full px-2.5 py-1 text-[0.65rem] font-medium ${
-                  row.status === 'Ready' ? 'bg-accentSoft text-ink' : 'bg-paper text-muted'
-                }`}
-              >
-                {row.status}
-              </span>
+      <div className="relative grid gap-4 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-stretch">
+        <div className="order-2 grid gap-3 sm:grid-cols-2 lg:order-1 lg:grid-cols-1 lg:content-center">
+          <div className="rounded-[1.25rem] border border-white/60 bg-white/80 p-5 text-left shadow-[0_24px_70px_rgba(27,20,40,0.11)] backdrop-blur-xl">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[0.62rem] uppercase tracking-terminal text-muted">Duplicate check</span>
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-warning" />
             </div>
-          ))}
+            <p className="mt-8 text-sm font-medium leading-6 text-ink">Nothing accidental gets through.</p>
+            <p className="mt-2 text-xs leading-5 text-muted">Existing atoms are found before publishing.</p>
+          </div>
+
+          <div className="rounded-[1.25rem] bg-ink p-5 text-left text-paper shadow-[0_24px_70px_rgba(27,20,40,0.16)]">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[0.62rem] uppercase tracking-terminal text-paper/55">Transaction</span>
+              <span className="rounded-full bg-accent px-2 py-1 text-[0.6rem] font-semibold text-black">ONE WRITE</span>
+            </div>
+            <p className="mt-7 font-serif text-3xl leading-none">2 ready</p>
+            <p className="mt-2 text-xs leading-5 text-paper/60">1 existing row safely left out.</p>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between border-t border-line/70 bg-paper/55 px-5 py-4 sm:px-6">
-          <p className="text-xs text-muted">Only eligible rows will be submitted.</p>
-          <span className="rounded-full bg-ink px-4 py-2 text-xs font-medium text-paper">Publish 2 atoms</span>
+        <div className="home-board order-1 overflow-hidden rounded-[1.4rem] border border-white/60 bg-white/88 shadow-[0_34px_100px_rgba(45,25,55,0.17)] backdrop-blur-2xl lg:order-2">
+          <div className="flex items-start justify-between gap-3 border-b border-line/70 px-4 py-4 sm:items-center sm:px-6">
+            <div className="min-w-0 text-left">
+              <p className="text-[0.62rem] uppercase tracking-terminal text-muted">Review queue</p>
+              <p className="mt-1 text-sm font-medium leading-5 text-ink">Your batch before it reaches the chain</p>
+            </div>
+            <span className="shrink-0 rounded-full bg-accentSoft px-3 py-1 text-xs font-medium text-ink">2 eligible</span>
+          </div>
+
+          <div className="divide-y divide-line/60 px-2 sm:px-4">
+            {reviewRows.map((row, index) => (
+              <div key={row.name} className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-2 px-2 py-3.5 sm:grid-cols-[2.5rem_minmax(0,1fr)_7rem_auto] sm:gap-3 sm:py-4">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-paper text-xs text-muted">
+                  {index + 1}
+                </span>
+                <div className="min-w-0 text-left">
+                  <p className="truncate text-sm font-medium text-ink">{row.name}</p>
+                  <p className="mt-0.5 text-xs text-muted sm:hidden">{row.type}</p>
+                </div>
+                <span className="hidden text-xs text-muted sm:block">{row.type}</span>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[0.65rem] font-medium ${
+                    row.status === 'Ready' ? 'bg-accentSoft text-ink' : 'bg-paper text-muted'
+                  }`}
+                >
+                  {row.status}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3 border-t border-line/70 bg-paper/55 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <p className="text-left text-xs leading-5 text-muted">Only eligible rows will be submitted.</p>
+            <span className="self-start rounded-full bg-ink px-4 py-2 text-xs font-medium text-paper sm:self-auto">Publish 2 atoms</span>
+          </div>
         </div>
       </div>
     </div>
@@ -106,11 +114,11 @@ function ReviewBoard() {
 export default function HomePage() {
   return (
     <AppShell fullBleed>
-      <main className="overflow-hidden border-t border-line/70 bg-white/70">
-        <section className="relative px-5 pb-4 pt-16 text-center sm:px-8 sm:pt-24">
+      <main className="overflow-hidden">
+        <section className="relative px-4 pb-14 pt-10 text-center sm:px-8 sm:pb-20 sm:pt-24">
           <div className="home-reveal mx-auto max-w-5xl">
             <p className="font-serif text-lg italic text-muted sm:text-xl">One atom or one thousand.</p>
-            <h1 className="mx-auto mt-5 max-w-4xl text-6xl font-semibold leading-[0.86] tracking-[-0.075em] text-ink sm:text-7xl lg:text-[6.7rem]">
+            <h1 className="mx-auto mt-5 max-w-4xl text-[2.8rem] font-semibold leading-[0.92] tracking-[-0.055em] text-ink min-[390px]:text-[3.2rem] sm:text-7xl sm:tracking-[-0.065em] lg:text-[6.7rem] lg:leading-[0.86] lg:tracking-[-0.075em]">
               Create knowledge.
               <span className="block font-serif font-normal italic tracking-[-0.065em]">Skip the busywork.</span>
             </h1>
@@ -118,17 +126,17 @@ export default function HomePage() {
               A community workspace for creating Intuition atoms and lists with fast imports, visible duplicate checks,
               and no surprises before you sign.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
                 href="/create"
-                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper transition-transform duration-200 hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper transition-transform duration-200 hover:-translate-y-0.5"
               >
                 Start creating
                 <ArrowIcon />
               </Link>
               <Link
                 href="/docs"
-                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/70 px-6 py-3 text-sm font-medium text-ink transition-colors duration-150 hover:border-ink/30"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-white/70 px-6 py-3 text-sm font-medium text-ink transition-colors duration-150 hover:border-ink/30"
               >
                 See how it works
               </Link>
@@ -166,13 +174,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="px-5 pb-8 sm:px-8">
-          <div className="home-pipeline relative mx-auto max-w-[86rem] overflow-hidden rounded-[2rem] bg-ink px-6 py-16 text-paper sm:px-10 sm:py-20 lg:px-16">
+        <section className="w-full px-5 py-8 sm:px-8 sm:py-10">
+          <div className="atmosphere-texture atmosphere-dark home-pipeline relative mx-auto box-border w-full max-w-[86rem] overflow-hidden rounded-[2rem] bg-ink px-6 py-16 text-paper sm:px-10 sm:py-20 xl:px-16">
             <div className="absolute -right-32 -top-52 h-[34rem] w-[34rem] rounded-full bg-accent opacity-90 blur-[1px]" />
             <div className="absolute -right-12 top-8 h-52 w-52 rounded-full bg-white/75 blur-3xl" />
 
-            <div className="relative grid gap-16 lg:grid-cols-[minmax(20rem,0.75fr)_minmax(0,1.25fr)] lg:gap-24">
-              <div>
+            <div className="relative grid min-w-0 gap-14 xl:grid-cols-[minmax(20rem,0.75fr)_minmax(0,1.25fr)] xl:gap-20">
+              <div className="min-w-0">
                 <p className="text-[0.7rem] uppercase tracking-terminal text-paper/55">Before the signature</p>
                 <h2 className="mt-5 max-w-xl text-5xl font-semibold leading-[0.9] tracking-[-0.06em] sm:text-6xl">
                   From rough input to a deliberate write.
@@ -190,12 +198,12 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              <div className="relative divide-y divide-paper/15 border-y border-paper/20">
+              <div className="relative min-w-0 divide-y divide-paper/15 border-y border-paper/20">
                 {flowSteps.map(([title, description], index) => (
-                  <div key={title} className="grid gap-3 py-5 sm:grid-cols-[2.5rem_7rem_minmax(0,1fr)] sm:items-center">
+                  <div key={title} className="grid min-w-0 gap-3 py-5 sm:grid-cols-[2.5rem_7rem_minmax(0,1fr)] sm:items-center">
                     <span className="font-mono text-xs text-accent">0{index + 1}</span>
                     <h3 className="text-base font-medium text-paper">{title}</h3>
-                    <p className="text-sm leading-6 text-paper/60">{description}</p>
+                    <p className="min-w-0 text-sm leading-6 text-paper/60">{description}</p>
                   </div>
                 ))}
               </div>

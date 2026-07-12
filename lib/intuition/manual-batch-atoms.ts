@@ -127,7 +127,11 @@ export async function publishManualBatchAtoms({
     value: preparedTransaction.value,
   });
 
-  await publicClient.waitForTransactionReceipt({ hash: txHash });
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+  if (receipt.status !== 'success') {
+    throw new Error('The createAtoms transaction was reverted on-chain. No atoms were confirmed as created.');
+  }
 
   return {
     kind: 'created',

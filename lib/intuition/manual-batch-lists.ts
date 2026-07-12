@@ -147,7 +147,11 @@ export async function publishManualBatchLists({
     value: preparedTransaction.value,
   });
 
-  await publicClient.waitForTransactionReceipt({ hash: txHash });
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+  if (receipt.status !== 'success') {
+    throw new Error('The createTriples transaction was reverted on-chain. No list entries were confirmed as created.');
+  }
 
   return {
     kind: 'created',

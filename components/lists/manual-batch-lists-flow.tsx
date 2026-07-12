@@ -53,7 +53,7 @@ export function ManualBatchListsFlow() {
   const walletNetworkConfig = getIntuitionNetworkByChainId(chainId ?? null);
   const walletReady = accountStatus === 'connected' && !!address;
   const canWrite = walletReady && walletNetworkConfig?.key === network;
-  const hasNetworkMismatch = walletReady && walletNetworkConfig !== null && walletNetworkConfig?.key !== network;
+  const hasNetworkMismatch = walletReady && walletNetworkConfig?.key !== network;
 
   const creatableEntries = useMemo(
     () => (reviewRows ? getCreatablePreparedListEntries(reviewRows) : []),
@@ -235,7 +235,7 @@ export function ManualBatchListsFlow() {
               type="button"
               onClick={addMemberRow}
               disabled={isReviewing || isPublishing}
-              className="inline-flex rounded-full border border-ink bg-ink px-4 py-2 text-sm text-paper transition-colors duration-150 hover:bg-[#3a2a23] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex rounded-full border border-ink bg-ink px-4 py-2 text-sm text-paper transition-opacity duration-150 hover:opacity-[0.85] disabled:cursor-not-allowed disabled:opacity-60"
             >
               + Add member
             </button>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { useSelectedNetwork } from '@/components/app/network-provider';
 import { CsvBatchAtomsFlow } from '@/components/atoms/csv-batch-atoms-flow';
 import { ManualBatchAtomsFlow } from '@/components/atoms/manual-batch-atoms-flow';
 import { CsvBatchListsFlow } from '@/components/lists/csv-batch-lists-flow';
@@ -12,12 +13,13 @@ type AtomMode = 'single_atom' | 'batch_atoms' | 'csv_atoms';
 type ListMode = 'manual_lists' | 'csv_lists';
 
 export function AtomCreationWorkspace() {
+  const { network } = useSelectedNetwork();
   const [section, setSection] = useState<WorkspaceSection>('atoms');
   const [atomMode, setAtomMode] = useState<AtomMode>('single_atom');
   const [listMode, setListMode] = useState<ListMode>('manual_lists');
 
   return (
-    <div className="overflow-hidden rounded-[1.5rem] border border-line/80 bg-white/70 shadow-sheet">
+    <div className="overflow-hidden rounded-[1.5rem] border border-line bg-white/82">
       <div className="space-y-3 px-6 py-3 sm:px-8 sm:py-4">
         <div className="space-y-1.5">
           <p className="text-[0.72rem] uppercase tracking-terminal text-muted">Create</p>
@@ -84,11 +86,11 @@ export function AtomCreationWorkspace() {
       </div>
 
       <div className="px-0 py-0">
-        {section === 'atoms' && atomMode === 'single_atom' ? <ManualBatchAtomsFlow mode="single" /> : null}
-        {section === 'atoms' && atomMode === 'batch_atoms' ? <ManualBatchAtomsFlow mode="batch" /> : null}
-        {section === 'atoms' && atomMode === 'csv_atoms' ? <CsvBatchAtomsFlow /> : null}
-        {section === 'lists' && listMode === 'manual_lists' ? <ManualBatchListsFlow /> : null}
-        {section === 'lists' && listMode === 'csv_lists' ? <CsvBatchListsFlow /> : null}
+        {section === 'atoms' && atomMode === 'single_atom' ? <ManualBatchAtomsFlow key={`single-${network}`} mode="single" /> : null}
+        {section === 'atoms' && atomMode === 'batch_atoms' ? <ManualBatchAtomsFlow key={`batch-${network}`} mode="batch" /> : null}
+        {section === 'atoms' && atomMode === 'csv_atoms' ? <CsvBatchAtomsFlow key={`csv-atoms-${network}`} /> : null}
+        {section === 'lists' && listMode === 'manual_lists' ? <ManualBatchListsFlow key={`lists-${network}`} /> : null}
+        {section === 'lists' && listMode === 'csv_lists' ? <CsvBatchListsFlow key={`csv-lists-${network}`} /> : null}
       </div>
     </div>
   );

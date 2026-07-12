@@ -287,3 +287,45 @@ test('publish helpers surface transaction failures', async () => {
     /User rejected request/,
   );
 });
+
+test('publish helpers reject reverted on-chain receipts', async () => {
+  const publicClient = {
+    waitForTransactionReceipt: async () => ({ status: 'reverted' }),
+  } as never;
+  const walletClient = {
+    sendTransaction: async () => '0x1111111111111111111111111111111111111111111111111111111111111111',
+  } as never;
+
+  await assert.rejects(
+    () =>
+      publishManualBatchAtoms({
+        atoms: [{ id: 'a1', displayName: 'alpha', dataString: 'alpha', atomId: '0x01', assetWei: 1n, supportWei: 0n, existsOnChain: false }],
+        network: 'testnet',
+        publicClient,
+        walletClient,
+        walletAddress: '0x1111111111111111111111111111111111111111',
+      }),
+    /reverted on-chain/i,
+  );
+
+  await assert.rejects(
+    () =>
+      publishManualBatchLists({
+        entries: [
+          {
+            id: 'm1',
+            listTermId: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            memberTermId: '0x1111111111111111111111111111111111111111111111111111111111111111',
+            tripleId: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+            assetWei: 1n,
+            alreadyExistsOnChain: false,
+          },
+        ],
+        network: 'testnet',
+        publicClient,
+        walletClient,
+        walletAddress: '0x1111111111111111111111111111111111111111',
+      }),
+    /reverted on-chain/i,
+  );
+});

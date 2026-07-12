@@ -20,15 +20,13 @@ const config: Config = {
         warning: 'rgb(var(--color-warning) / <alpha-value>)',
         danger: 'rgb(var(--color-danger) / <alpha-value>)'
       },
-      boxShadow: {
-        sheet: '0 24px 80px rgba(49, 39, 24, 0.08)',
-      },
       letterSpacing: {
         terminal: '0.14em',
       },
       fontFamily: {
-        sans: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-geist)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         serif: ['ui-serif', 'Georgia', 'serif'],
+        mono: ['var(--font-geist-mono)', 'ui-monospace', 'monospace'],
       },
     },
   },

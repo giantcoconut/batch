@@ -44,7 +44,7 @@ export function CsvBatchAtomsFlow() {
   const walletNetworkConfig = getIntuitionNetworkByChainId(chainId ?? null);
   const walletReady = accountStatus === 'connected' && !!address;
   const canWrite = walletReady && walletNetworkConfig?.key === network;
-  const hasNetworkMismatch = walletReady && walletNetworkConfig !== null && walletNetworkConfig?.key !== network;
+  const hasNetworkMismatch = walletReady && walletNetworkConfig?.key !== network;
 
   const creatableAtoms = useMemo(() => (reviewRows ? getCreatablePreparedAtoms(reviewRows) : []), [reviewRows]);
   const invalidPreviewRows = useMemo(() => parsedRows?.filter((row) => row.errors.length > 0).length ?? 0, [parsedRows]);
@@ -247,7 +247,7 @@ export function CsvBatchAtomsFlow() {
                       <summary className="inline-flex cursor-pointer list-none rounded-full border border-line bg-paper/70 px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-ink/15 hover:text-ink">
                         Download sample
                       </summary>
-                      <div className="absolute left-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-line/80 bg-white shadow-sheet">
+                      <div className="absolute left-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-line bg-white">
                         <button
                           type="button"
                           onClick={(event) => {
@@ -272,7 +272,7 @@ export function CsvBatchAtomsFlow() {
                     </details>
                     <span className="group relative inline-flex h-7 w-7 items-center justify-center rounded-full border border-line bg-white/80 text-xs text-muted">
                       ?
-                      <span className="pointer-events-none absolute right-0 top-9 z-30 hidden w-64 rounded-xl border border-line/80 bg-white p-3 text-left text-[0.72rem] leading-5 text-muted shadow-sheet group-hover:block group-focus:block">
+                      <span className="pointer-events-none absolute right-0 top-9 z-30 hidden w-64 rounded-xl border border-line bg-white p-3 text-left text-[0.72rem] leading-5 text-muted group-hover:block group-focus:block">
                         Basic is best when every row uses the selected default schema. Schema-aware includes `schema_type` for mixed atom types.
                       </span>
                     </span>
@@ -315,7 +315,7 @@ export function CsvBatchAtomsFlow() {
               type="button"
               onClick={handlePreview}
               disabled={isParsing || isReviewing || isPublishing}
-              className="inline-flex rounded-full border border-ink bg-ink px-4 py-2 text-sm text-paper transition-colors duration-150 hover:bg-[#3a2a23] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex rounded-full border border-ink bg-ink px-4 py-2 text-sm text-paper transition-opacity duration-150 hover:opacity-[0.85] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isParsing ? 'Parsing CSV...' : 'Preview CSV rows'}
             </button>

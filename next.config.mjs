@@ -1,9 +1,11 @@
+const distDirOverride = process.env.COLLATE_NEXT_DIST_DIR?.trim();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: '.next-build',
+  // Keep Windows dev and build processes from contending for the same locked trace file.
+  distDir: distDirOverride || (process.env.NODE_ENV === 'development' ? '.next-dev' : '.next-build'),
   experimental: {
     cpus: 1,
-    workerThreads: true,
   },
   webpack: (config) => {
     config.resolve.alias = {

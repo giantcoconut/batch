@@ -12,13 +12,18 @@ import { SelectedNetworkProvider } from '@/components/app/network-provider';
 import { WalletIdentityAvatar } from '@/components/wallet/wallet-identity-avatar';
 import { walletConfig } from '@/lib/intuition/wallet-config';
 
-const rainbowTheme = lightTheme({
-  accentColor: '#231714',
-  accentColorForeground: '#f8f2ea',
-  borderRadius: 'medium',
-  fontStack: 'system',
-  overlayBlur: 'small',
-});
+const rainbowTheme = {
+  ...lightTheme({
+    accentColor: '#8DF1C9',
+    accentColorForeground: '#111111',
+    borderRadius: 'medium',
+    fontStack: 'system',
+    overlayBlur: 'small',
+  }),
+  fonts: {
+    body: 'var(--font-geist), sans-serif',
+  },
+};
 
 function WalletAvatar({
   address,

@@ -1,5 +1,5 @@
 {
-  "name": "intuition-batch-tool",
+  "name": "collate",
   "version": "0.1.0",
   "private": true,
   "type": "module",

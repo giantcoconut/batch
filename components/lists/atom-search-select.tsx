@@ -23,7 +23,7 @@ function AtomSearchResultCard({
     <div
       className={
         isSelected
-          ? 'rounded-xl border border-[#5d8a62] bg-[#edf6ee] p-4 shadow-[0_0_0_1px_rgba(93,138,98,0.08)]'
+          ? 'rounded-xl border border-[#5d8a62] bg-[#edf6ee] p-4'
           : 'rounded-xl border border-line/80 bg-white/72 p-4'
       }
     >

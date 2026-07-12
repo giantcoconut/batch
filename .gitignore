@@ -1,5 +1,7 @@
 .next
 .next-build
+.next-dev
+.next-audit
 node_modules
 coverage
 dist
