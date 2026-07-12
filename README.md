@@ -80,6 +80,17 @@ npm run build
 - `next dev` writes to `.next-dev`, while `next build` writes to `.next-build`. Keeping these directories separate prevents a running Windows dev server from locking the production `trace` file.
 - If an older dev process was started before this separation and `npm run build` reports `EPERM` for `.next-build/trace`, stop that dev process, close any stale repo-specific Node processes, then run `npm run build` again. Both directories are generated and gitignored.
 
+## Netlify
+
+Connect the repository as a Next.js site using these settings:
+
+- Base directory: leave blank (repository root)
+- Build command: `npm run build`
+- Publish directory: `.next`
+- Runtime handling: automatic Netlify OpenNext adapter; do not add a static export or legacy Next plugin
+
+The committed `netlify.toml` sets Node.js 20, and `next.config.mjs` automatically uses Netlify's standard `.next` output whenever Netlify's built-in `NETLIFY=true` flag is present. In Netlify environment variables, set `INTUITION_PIN_API_KEY` with Functions scope and set `NEXT_PUBLIC_APP_URL` to the site's final HTTPS origin with Builds scope. WalletConnect, ENS RPC, Intuition endpoint, and explorer overrides remain optional as described above. Because `NEXT_PUBLIC_*` values are embedded at build time, redeploy after changing them.
+
 ## Follow-ups intentionally not implemented yet
 
 - Create new list atom inside list flows

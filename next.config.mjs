@@ -1,9 +1,10 @@
 const distDirOverride = process.env.COLLATE_NEXT_DIST_DIR?.trim();
+const isNetlifyBuild = process.env.NETLIFY === 'true';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Keep Windows dev and build processes from contending for the same locked trace file.
-  distDir: distDirOverride || (process.env.NODE_ENV === 'development' ? '.next-dev' : '.next-build'),
+  distDir: distDirOverride || (isNetlifyBuild ? '.next' : process.env.NODE_ENV === 'development' ? '.next-dev' : '.next-build'),
   experimental: {
     cpus: 1,
   },
